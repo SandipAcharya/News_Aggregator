@@ -1,0 +1,215 @@
+import { useStore } from '../store/useStore';
+import { ChevronDown } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+
+export const Filters = () => {
+    const {
+        selectedCategory, setSelectedCategory,
+        selectedLeaning, setSelectedLeaning,
+        selectedLanguage, setSelectedLanguage,
+        selectedCountry, setSelectedCountry,
+        selectedSourceType, setSelectedSourceType,
+        startDate, setStartDate,
+        endDate, setEndDate,
+        datePreset, setDatePreset,
+        clearAllFilters,
+    } = useStore();
+
+    const queryClient = useQueryClient();
+
+    const handleApplyFilters = () => {
+        // Force React Query to refetch with the current Zustand filter state
+        queryClient.invalidateQueries({ queryKey: ['articles'] });
+    };
+
+    const handleClearAll = () => {
+        clearAllFilters();
+        queryClient.invalidateQueries({ queryKey: ['articles'] });
+    };
+
+    return (
+        <div className="flex flex-col h-full bg-surface text-text-main py-6 px-4">
+
+            <div className="flex-1 space-y-6 overflow-y-auto">
+
+                {/* Date Range Presets */}
+                <div>
+                    <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Date Range</h3>
+                    <div className="flex gap-2 mb-4">
+                        {[7, 14, 30].map((days) => (
+                            <button
+                                key={days}
+                                onClick={() => setDatePreset(datePreset === days ? null : days)}
+                                className={`flex-1 py-1.5 border rounded-md text-sm font-medium transition-colors ${
+                                    datePreset === days
+                                        ? 'bg-primary border-primary text-white'
+                                        : 'bg-background border-border text-text-muted hover:text-text-main hover:border-primary'
+                                }`}
+                            >
+                                {days}d
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex gap-3">
+                        <div className="flex-1">
+                            <label className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 block">Start Date</label>
+                            <input
+                                type="date"
+                                value={startDate || ''}
+                                onChange={(e) => setStartDate(e.target.value || null)}
+                                className="w-full h-10 bg-background border border-border rounded-md px-2 text-sm text-text-main focus:outline-none focus:border-primary cursor-pointer"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="text-xs font-bold text-text-muted uppercase tracking-wider mb-2 block">End Date</label>
+                            <input
+                                type="date"
+                                value={endDate || ''}
+                                onChange={(e) => setEndDate(e.target.value || null)}
+                                className="w-full h-10 bg-background border border-border rounded-md px-2 text-sm text-text-main focus:outline-none focus:border-primary cursor-pointer"
+                            />
+                        </div>
+                    </div>
+                    {(startDate || endDate) && (
+                        <button
+                            onClick={() => { setStartDate(null); setEndDate(null); setDatePreset(null); }}
+                            className="text-xs text-primary mt-2 hover:underline"
+                        >
+                            Clear dates
+                        </button>
+                    )}
+                </div>
+
+                <hr className="border-border" />
+
+                {/* Topics / Category */}
+                <div>
+                    <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Topics</h3>
+                    <div className="relative">
+                        <select
+                            value={selectedCategory || ''}
+                            onChange={(e) => setSelectedCategory(e.target.value || null)}
+                            className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
+                        >
+                            <option value="">All Topics</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Business">Business</option>
+                            <option value="Politics">Politics</option>
+                            <option value="Science">Science</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Health">Health</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="World">World</option>
+                        </select>
+                        <ChevronDown size={16} className="absolute right-3 top-3 pointer-events-none text-text-muted" />
+                    </div>
+                </div>
+
+                {/* Media Bias (Political Leaning) */}
+                <div>
+                    <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Media Bias</h3>
+                    <p className="text-[10px] text-text-muted mb-3">Editorial slant of the news source</p>
+                    <div className="relative">
+                        <select
+                            value={selectedLeaning || ''}
+                            onChange={(e) => setSelectedLeaning(e.target.value || null)}
+                            className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
+                        >
+                            <option value="">All Leanings</option>
+                            <option value="Left">◀ Left</option>
+                            <option value="Center-Left">◁ Center-Left</option>
+                            <option value="Center">● Center</option>
+                            <option value="Center-Right">▷ Center-Right</option>
+                            <option value="Right">▶ Right</option>
+                        </select>
+                        <ChevronDown size={16} className="absolute right-3 top-3 pointer-events-none text-text-muted" />
+                    </div>
+                </div>
+
+                {/* Country */}
+                <div>
+                    <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Country</h3>
+                    <div className="relative">
+                        <select
+                            value={selectedCountry || ''}
+                            onChange={(e) => setSelectedCountry(e.target.value || null)}
+                            className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
+                        >
+                            <option value="">All Countries</option>
+                            <option value="US">🇺🇸 United States</option>
+                            <option value="GB">🇬🇧 United Kingdom</option>
+                            <option value="NP">🇳🇵 Nepal</option>
+                            <option value="IN">🇮🇳 India</option>
+                            <option value="CN">🇨🇳 China</option>
+                            <option value="DE">🇩🇪 Germany</option>
+                            <option value="FR">🇫🇷 France</option>
+                            <option value="AU">🇦🇺 Australia</option>
+                            <option value="CA">🇨🇦 Canada</option>
+                        </select>
+                        <ChevronDown size={16} className="absolute right-3 top-3 pointer-events-none text-text-muted" />
+                    </div>
+                </div>
+
+                {/* Language */}
+                <div>
+                    <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Language</h3>
+                    <div className="relative">
+                        <select
+                            value={selectedLanguage || ''}
+                            onChange={(e) => setSelectedLanguage(e.target.value || null)}
+                            className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
+                        >
+                            <option value="">All Languages</option>
+                            <option value="en">English</option>
+                            <option value="ne">Nepali (नेपाली)</option>
+                            <option value="hi">Hindi (हिंदी)</option>
+                            <option value="zh">Chinese (中文)</option>
+                            <option value="de">German (Deutsch)</option>
+                            <option value="fr">French (Français)</option>
+                            <option value="es">Spanish (Español)</option>
+                            <option value="ar">Arabic (العربية)</option>
+                        </select>
+                        <ChevronDown size={16} className="absolute right-3 top-3 pointer-events-none text-text-muted" />
+                    </div>
+                </div>
+
+                {/* Source Type */}
+                <div>
+                    <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Source Type</h3>
+                    <div className="relative">
+                        <select
+                            value={selectedSourceType || ''}
+                            onChange={(e) => setSelectedSourceType(e.target.value || null)}
+                            className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
+                        >
+                            <option value="">All Source Types</option>
+                            <option value="newspaper">📰 Newspaper</option>
+                            <option value="magazine">📖 Magazine</option>
+                            <option value="digital">💻 Digital Native</option>
+                            <option value="broadcast">📡 Broadcast</option>
+                            <option value="wire">📡 Wire Service</option>
+                            <option value="blog">✍️ Blog / Opinion</option>
+                        </select>
+                        <ChevronDown size={16} className="absolute right-3 top-3 pointer-events-none text-text-muted" />
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="pt-6 flex gap-3 mt-auto border-t border-border shrink-0">
+                <button
+                    onClick={handleClearAll}
+                    className="flex-1 py-2.5 bg-transparent border border-border rounded-lg text-sm font-medium hover:bg-background transition-colors text-text-main"
+                >
+                    Clear All
+                </button>
+                <button
+                    onClick={handleApplyFilters}
+                    className="flex-1 py-2.5 bg-primary hover:bg-orange-600 rounded-lg text-sm font-medium text-white transition-colors"
+                >
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    );
+};
