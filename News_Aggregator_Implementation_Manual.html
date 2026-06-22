@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>News Aggregator: Enterprise Implementation Manual</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 40px 20px;
+        }
+        h1, h2, h3 { color: #24292e; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; margin-top: 1.5em; }
+        h1 { font-size: 2em; border-bottom: 2px solid #eaecef; }
+        h2 { font-size: 1.5em; }
+        h3 { font-size: 1.25em; border: none; }
+        p, ul, li { margin-bottom: 16px; }
+        pre { background-color: #f6f8fa; border-radius: 6px; padding: 16px; overflow: auto; font-size: 85%; line-height: 1.45; }
+        code { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; background-color: rgba(27,31,35,0.05); padding: 0.2em 0.4em; border-radius: 3px; font-size: 85%; }
+        pre > code { background-color: transparent; padding: 0; }
+        hr { height: 0.25em; padding: 0; margin: 40px 0; background-color: #e1e4e8; border: 0; }
+    </style>
+</head>
+<body>
+
+    <h1>News Aggregator: Enterprise Implementation Manual</h1>
+    <p>This manual provides the step-by-step 21-day enterprise development plan. To ensure absolute clarity for the team, every phase includes <strong>concrete examples</strong> (code snippets, JSON payloads, and logic) of what each intern is expected to produce, integrating advanced features like Auth, State Management, and robust architecture.</p>
+    <hr>
+
+    <h2>Days 1-3: Core Data Models, Auth & Demo Mode</h2>
+    <p><strong>Objective:</strong> Establish the database tables, identity management, and define data structures so frontend, backend, and ML can work in parallel. Implement <strong>Demo Mode</strong> for instant offline development.</p>
+
+    <h3>1. Node.js (Intern 2)</h3>
+    <p><strong>Task:</strong> Initialize Express, JWT Auth routes, and <strong>Demo Mode</strong>.</p>
+    <p><strong>Example Output (<code>services/news.ts</code>):</strong></p>
+<pre><code>import demoArticles from '../demo-data/articles.json';
+
+export const fetchArticles = async (query) => {
+    // Demo Mode allows frontend/ML to work without a real DB or API Key
+    if (process.env.ENABLE_DEMO_MODE === 'true') {
+        console.log("Serving from offline cache...");
+        return applyFilters(demoArticles, query); 
+    }
+    return prisma.article.findMany({ where: buildQuery(query) });
+};</code></pre>
+
+    <hr>
+
+    <h2>Days 4-6: Message Queues & UI Polish</h2>
+    <p><strong>Objective:</strong> Scrape real news using RabbitMQ, and build a polished UI with Skeleton Loaders and Dark Mode.</p>
+
+    <h3>1. React (Intern 3)</h3>
+    <p><strong>Task:</strong> Build Feed UI using React Query and implement Skeleton Loaders.</p>
+    <p><strong>Example Output (<code>components/ArticleFeed.tsx</code>):</strong></p>
+<pre><code>import { useQuery } from '@tanstack/react-query';
+import { SkeletonCard } from './SkeletonCard';
+
+export const ArticleFeed = () => {
+  const { data, isLoading } = useQuery(['articles'], fetchArticles);
+
+  if (isLoading) return (
+    &lt;div className="grid"&gt;
+      {[1,2,3,4].map(n =&gt; &lt;SkeletonCard key={n} /&gt;)}
+    &lt;/div&gt;
+  );
+
+  return &lt;div className="grid"&gt;{data.map(article =&gt; &lt;Card data={article} /&gt;)}&lt;/div&gt;;
+};</code></pre>
+
+    <hr>
+
+    <h2>Days 7-9: The Machine Learning Microservice</h2>
+    <p><strong>Objective:</strong> The ML code runs independently via FastAPI, providing rich metadata like Language and Political Bias.</p>
+
+    <h3>1. Machine Learning (Intern 4)</h3>
+    <p><strong>Task:</strong> Wrap NLP scripts into a FastAPI application for advanced metadata.</p>
+    <p><strong>Example Output (<code>main.py</code>):</strong></p>
+<pre><code>from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+@app.post("/api/ml/analyze")
+async def analyze_article(data: ArticleInput):
+    # Determine Category, Language, and Political Bias
+    return {
+        "category": detect_category(data.text),
+        "language": detect_language(data.text),       # e.g., 'en', 'es'
+        "political_leaning": detect_bias(data.text)   # e.g., 'Center-Left'
+    }</code></pre>
+
+    <hr>
+
+    <h2>Days 10-12: The Grand Integration</h2>
+    <p><strong>Objective:</strong> Automate enrichment via ML microservice and allow complex Boolean searches.</p>
+
+    <h3>1. Node.js (Intern 2)</h3>
+    <p><strong>Task:</strong> Implement Boolean Search logic in the database queries.</p>
+    <p><strong>Example Output (<code>utils/searchBuilder.ts</code>):</strong></p>
+<pre><code>export const buildBooleanQuery = (searchString: string) => {
+    // Converts "technology AND AI NOT crypto" to DB filters
+    // This replicates the advanced filtering seen in professional tools
+    const tokens = parseSearchString(searchString);
+    return convertTokensToPrismaWhere(tokens);
+};</code></pre>
+
+    <hr>
+
+    <h2>Days 13-15: Smart Caching</h2>
+    <p><strong>Objective:</strong> Add Redis caching to the Node.js API to handle high load, using dynamic TTLs.</p>
+
+    <h3>1. Node.js (Intern 2)</h3>
+    <p><strong>Task:</strong> Implement Smart Redis caching on the main feed endpoint.</p>
+    <p><strong>Example Output (<code>middleware/redis.ts</code>):</strong></p>
+<pre><code>import redisClient from '../lib/redis';
+
+export const smartCacheMiddleware = async (req, res, next) => {
+    const key = `articles_page_${req.query.page}`;
+    const cachedData = await redisClient.get(key);
+    if (cachedData) return res.json(JSON.parse(cachedData)); 
+    
+    const originalJson = res.json.bind(res);
+    res.json = (body) => {
+        // Smart Caching: 1 hr for recent news, 24 hrs for historical
+        const ttl = isRecentNewsQuery(req.query) ? 3600 : 86400;
+        redisClient.setEx(key, ttl, JSON.stringify(body));
+        originalJson(body);
+    };
+    next();
+};</code></pre>
+
+    <hr>
+
+    <h2>Days 16-18: End-to-End Testing</h2>
+    <p><strong>Objective:</strong> Setup automated browser testing.</p>
+
+    <h3>1. Entire Team</h3>
+    <p><strong>Task:</strong> Write Playwright E2E tests.</p>
+    <p><strong>Example Output (<code>playwright.config.ts</code>):</strong></p>
+<pre><code>import { PlaywrightTestConfig } from '@playwright/test';
+
+const config: PlaywrightTestConfig = {
+  testDir: './e2e',
+  use: {
+    baseURL: 'http://localhost:5173',
+    browserName: 'chromium',
+  },
+};
+export default config;</code></pre>
+
+    <hr>
+
+    <h2>Days 19-21: API Gateway & Final Handoff</h2>
+    <p><strong>Objective:</strong> Deploy behind an Nginx API Gateway.</p>
+
+</body>
+</html>
