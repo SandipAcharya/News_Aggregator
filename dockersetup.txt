@@ -1,0 +1,10 @@
+         0.8s 
+               (inpanda) PS D:\pandata\inpanda\Ne# 1. Rebuild the Node and Django containers with the new code
+>> docker-compose up -d --build node-api django-admin celery-worker celery-beat
+>> 
+>> # 2. Apply the new database migration (to add the image_url column)
+>> docker-compose exec django-admin python manage.py makemigrations news
+>> docker-compose exec django-admin python manage.py migrate
+>> 
+>> # 3. Trigger a fresh scrape to pull real images
+>> docker-compose exec django-admin python manage.py shell -c "from news.tasks import scrape_rss_feeds; print(scrape_rss_feeds())"
