@@ -276,6 +276,10 @@ Every 30 minutes:
                                     │
                     fetches each RSS XML feed (feedparser)
                                     │
+                    strips HTML & decodes entities via Regex
+                                    │
+                    extracts image_url (RSS tags or og:image fallback)
+                                    │
                     saves new articles → [PostgreSQL]
                     (duplicate URLs are auto-skipped)
                                     │
@@ -385,6 +389,7 @@ Returns a paginated list of articles with optional filtering.
       "id": "uuid-here",
       "title": "Pound Falls on Growing Political Upheaval",
       "url": "https://www.theguardian.com/...",
+      "image_url": "https://i.guim.co.uk/img/media/...",
       "category": "General",
       "political_leaning": "Center",
       "language": "en",

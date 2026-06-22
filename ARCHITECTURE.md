@@ -21,10 +21,15 @@
 
 The platform uses an asynchronous background worker system. No manual intervention is needed.
 
-- **Celery Beat** fires the `scrape_rss_feeds` task every 30 minutes automatically.
-- The task is dispatched to **RabbitMQ** (`amqp://rabbitmq:5672`) and picked up by a **Celery Worker**.
-- The worker iterates over all active `NewsSource` records, fetches their RSS XML feeds using `feedparser`, and saves new articles into PostgreSQL.
-- Duplicate URLs are silently skipped via Django's `get_or_create` logic.
+- **Automated Scheduling**: **Celery Beat** dispatches the `scrape_rss_feeds` task to **RabbitMQ** (`amqp://rabbitmq:5672`) every 30 minutes, where a **Celery Worker** executes it.
+- **Data Fetching**: Iterates over all active `NewsSource` records, fetching RSS XML feeds using `feedparser`. Duplicate URLs are ignored.
+- **Data Cleaning**: The scraper completely strips HTML tags and decodes HTML entities from raw descriptions using strict Regex before storing them in PostgreSQL.
+- **Image Extraction Engine**:
+  1. Checks `media:content` and `media:thumbnail` RSS tags.
+  2. Checks for enclosure attachments (e.g., podcasts/images).
+  3. Parses the raw HTML description for embedded `<img>` tags.
+  4. **Ultimate Fallback**: If the publisher strips images from RSS (e.g., The Kathmandu Post), it opens an invisible HTTP connection to the actual article webpage and scrapes the `<meta property="og:image">` Open Graph tag.
+- **Machine Learning**: Passes the clean text to the FastAPI service to classify `category` and `political_leaning`.
 
 ### ✅ Verified Celery Execution Log
 ```
