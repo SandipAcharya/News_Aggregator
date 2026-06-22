@@ -12,7 +12,7 @@ const queryClient = new QueryClient({
 });
 
 function App() {
-  const { isDarkMode, toggleDarkMode, viewMode, setViewMode, setSearchQuery, startDate, setStartDate, endDate, setEndDate } = useStore();
+  const { isDarkMode, toggleDarkMode, viewMode, setViewMode, setSearchQuery, startDate, setStartDate, endDate, setEndDate, token, logout } = useStore();
   const [inputValue, setInputValue] = useState('');
 
   const handleSearch = () => {
@@ -41,12 +41,29 @@ function App() {
             <h1 className="text-2xl font-bold text-text-main tracking-tight">News Aggregator</h1>
             <span className="text-sm font-medium text-text-muted hidden sm:block">Powered by KAFAL CARE</span>
           </div>
-          <button 
-            onClick={toggleDarkMode}
-            className="w-10 h-10 rounded-lg bg-background flex items-center justify-center text-text-muted hover:text-white border border-border transition-colors"
-          >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+          <div className="flex items-center gap-4">
+            {token ? (
+              <button 
+                onClick={logout}
+                className="text-sm font-bold text-text-muted hover:text-red-500 transition-colors"
+              >
+                Log out
+              </button>
+            ) : (
+              <a 
+                href="/login"
+                className="text-sm font-bold text-primary hover:text-orange-500 transition-colors"
+              >
+                Sign In
+              </a>
+            )}
+            <button 
+              onClick={toggleDarkMode}
+              className="w-10 h-10 rounded-lg bg-background flex items-center justify-center text-text-muted hover:text-white border border-border transition-colors"
+            >
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          </div>
         </header>
 
         {/* Main Content Layout */}
@@ -72,12 +89,32 @@ function App() {
                   type="text" 
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
+                  onKeyDown={(e) => {
+                    if (!token) {
+                      e.preventDefault();
+                      window.location.href = '/login';
+                      return;
+                    }
+                    handleKeyDown(e);
+                  }}
+                  onClick={(e) => {
+                    if (!token) {
+                      e.preventDefault();
+                      window.location.href = '/login';
+                    }
+                  }}
                   placeholder="Search news... (e.g., climate change, technology)"
                   className="w-full h-12 pl-11 pr-24 rounded-xl border border-border bg-surface text-text-main placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
                 />
                 <button 
-                  onClick={handleSearch}
+                  onClick={(e) => {
+                    if (!token) {
+                      e.preventDefault();
+                      window.location.href = '/login';
+                      return;
+                    }
+                    handleSearch();
+                  }}
                   className="absolute right-2 top-2 bottom-2 px-6 bg-primary hover:bg-orange-600 text-white font-medium rounded-lg transition-colors"
                 >
                   Search

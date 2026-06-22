@@ -1,6 +1,7 @@
 import { useStore } from '../store/useStore';
 import { ChevronDown } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 export const Filters = () => {
     const {
@@ -16,16 +17,26 @@ export const Filters = () => {
     } = useStore();
 
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
-    const handleApplyFilters = () => {
-        // Force React Query to refetch with the current Zustand filter state
-        queryClient.invalidateQueries({ queryKey: ['articles'] });
+    const requireAuth = <T extends (...args: any[]) => any>(action: T) => {
+        return (...args: Parameters<T>) => {
+            if (!useStore.getState().token) {
+                navigate('/login');
+                return;
+            }
+            return action(...args);
+        };
     };
 
-    const handleClearAll = () => {
+    const handleApplyFilters = requireAuth(() => {
+        queryClient.invalidateQueries({ queryKey: ['articles'] });
+    });
+
+    const handleClearAll = requireAuth(() => {
         clearAllFilters();
         queryClient.invalidateQueries({ queryKey: ['articles'] });
-    };
+    });
 
     return (
         <div className="flex flex-col h-full bg-surface text-text-main py-6 px-4">
@@ -39,7 +50,7 @@ export const Filters = () => {
                         {[7, 14, 30].map((days) => (
                             <button
                                 key={days}
-                                onClick={() => setDatePreset(datePreset === days ? null : days)}
+                                onClick={requireAuth(() => setDatePreset(datePreset === days ? null : days))}
                                 className={`flex-1 py-1.5 border rounded-md text-sm font-medium transition-colors ${
                                     datePreset === days
                                         ? 'bg-primary border-primary text-white'
@@ -56,7 +67,8 @@ export const Filters = () => {
                             <input
                                 type="date"
                                 value={startDate || ''}
-                                onChange={(e) => setStartDate(e.target.value || null)}
+                                onChange={requireAuth((e: any) => setStartDate(e.target.value || null))}
+                                onClick={requireAuth(() => {})}
                                 className="w-full h-10 bg-background border border-border rounded-md px-2 text-sm text-text-main focus:outline-none focus:border-primary cursor-pointer"
                             />
                         </div>
@@ -65,14 +77,15 @@ export const Filters = () => {
                             <input
                                 type="date"
                                 value={endDate || ''}
-                                onChange={(e) => setEndDate(e.target.value || null)}
+                                onChange={requireAuth((e: any) => setEndDate(e.target.value || null))}
+                                onClick={requireAuth(() => {})}
                                 className="w-full h-10 bg-background border border-border rounded-md px-2 text-sm text-text-main focus:outline-none focus:border-primary cursor-pointer"
                             />
                         </div>
                     </div>
                     {(startDate || endDate) && (
                         <button
-                            onClick={() => { setStartDate(null); setEndDate(null); setDatePreset(null); }}
+                            onClick={requireAuth(() => { setStartDate(null); setEndDate(null); setDatePreset(null); })}
                             className="text-xs text-primary mt-2 hover:underline"
                         >
                             Clear dates
@@ -88,7 +101,8 @@ export const Filters = () => {
                     <div className="relative">
                         <select
                             value={selectedCategory || ''}
-                            onChange={(e) => setSelectedCategory(e.target.value || null)}
+                            onChange={requireAuth((e: any) => setSelectedCategory(e.target.value || null))}
+                            onClick={requireAuth(() => {})}
                             className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
                         >
                             <option value="">All Topics</option>
@@ -112,7 +126,8 @@ export const Filters = () => {
                     <div className="relative">
                         <select
                             value={selectedLeaning || ''}
-                            onChange={(e) => setSelectedLeaning(e.target.value || null)}
+                            onChange={requireAuth((e: any) => setSelectedLeaning(e.target.value || null))}
+                            onClick={requireAuth(() => {})}
                             className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
                         >
                             <option value="">All Leanings</option>
@@ -132,7 +147,8 @@ export const Filters = () => {
                     <div className="relative">
                         <select
                             value={selectedCountry || ''}
-                            onChange={(e) => setSelectedCountry(e.target.value || null)}
+                            onChange={requireAuth((e: any) => setSelectedCountry(e.target.value || null))}
+                            onClick={requireAuth(() => {})}
                             className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
                         >
                             <option value="">All Countries</option>
@@ -156,7 +172,8 @@ export const Filters = () => {
                     <div className="relative">
                         <select
                             value={selectedLanguage || ''}
-                            onChange={(e) => setSelectedLanguage(e.target.value || null)}
+                            onChange={requireAuth((e: any) => setSelectedLanguage(e.target.value || null))}
+                            onClick={requireAuth(() => {})}
                             className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
                         >
                             <option value="">All Languages</option>
@@ -179,7 +196,8 @@ export const Filters = () => {
                     <div className="relative">
                         <select
                             value={selectedSourceType || ''}
-                            onChange={(e) => setSelectedSourceType(e.target.value || null)}
+                            onChange={requireAuth((e: any) => setSelectedSourceType(e.target.value || null))}
+                            onClick={requireAuth(() => {})}
                             className="w-full h-10 bg-background border border-border rounded-md appearance-none px-3 text-sm focus:outline-none focus:border-primary text-text-main cursor-pointer"
                         >
                             <option value="">All Source Types</option>

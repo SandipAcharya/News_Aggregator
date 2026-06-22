@@ -65,3 +65,16 @@ export const fetchArticles = async (params: FetchArticlesParams): Promise<Articl
     return response.data.data;
 };
 
+// ── Auth Endpoints ─────────────────────────────────────────────────────────
+
+export const login = async (email: string, password: string) => {
+    const response = await apiClient.post('/auth/login', { email, password });
+    return response.data;
+};
+
+export const signup = async (email: string, password: string, username: string) => {
+    const response = await apiClient.post('/auth/signup', { email, password, username });
+    return response.data;
+};
+
+

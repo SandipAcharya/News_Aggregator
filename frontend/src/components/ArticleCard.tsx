@@ -1,5 +1,7 @@
 import type { Article } from '../services/api';
 import { ExternalLink, ImageOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '../store/useStore';
 
 interface Props {
     article: Article;
@@ -24,6 +26,15 @@ const categoryGradient: Record<string, string> = {
 export const ArticleCard: React.FC<Props> = ({ article, viewMode }) => {
     const isList = viewMode === 'list';
     const gradient = categoryGradient[article.category] ?? 'from-slate-700 to-slate-900';
+    const navigate = useNavigate();
+    const { token } = useStore();
+
+    const handleCardClick = (e: React.MouseEvent) => {
+        if (!token) {
+            e.preventDefault();
+            navigate('/login');
+        }
+    };
 
     // Calculate relative time
     const getRelativeTime = (dateString: string) => {
@@ -41,6 +52,7 @@ export const ArticleCard: React.FC<Props> = ({ article, viewMode }) => {
             href={article.url}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={handleCardClick}
             className={`
                 block bg-surface rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group
                 ${isList ? 'flex flex-row h-48' : 'flex flex-col'}
