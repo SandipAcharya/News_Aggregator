@@ -422,31 +422,59 @@ Returns the server mode and status.
 
 ---
 
-## Health Check Commands
+## 🚦 Diagnostic & Maintenance Cheat Sheet
 
+Use these commands to monitor system health, view background tasks, and manage database/cache states.
+
+### 1. Monitor the Background Scraper (Celery)
+To check if the background engine is running, how long scrapes take, and how many articles are harvested:
 ```powershell
-# Are all containers running?
-docker-compose ps
+# View the celery worker logs (shows scraped counts and task success)
+docker-compose logs --tail=50 celery-worker
 
-# Total articles in the database
+# View the celery beat scheduler logs (shows when tasks are dispatched)
+docker-compose logs --tail=50 celery-beat
+```
+
+### 2. Query the PostgreSQL Database
+To directly inspect database tables without accessing the Django Admin:
+```powershell
+# View total articles stored
 docker-compose exec db psql -U news_user -d news_db -c "SELECT COUNT(*) FROM news_article;"
 
-# Articles per source
-docker-compose exec db psql -U news_user -d news_db -c \
-  "SELECT s.name, COUNT(a.id) FROM news_article a \
-   JOIN news_newssource s ON a.source_id=s.id \
-   GROUP BY s.name ORDER BY 2 DESC;"
+# View breakdown of articles by source (helps verify scraper coverage)
+docker-compose exec db psql -U news_user -d news_db -c "SELECT s.name, COUNT(a.id) as article_count FROM news_article a JOIN news_newssource s ON a.source_id = s.id GROUP BY s.name ORDER BY article_count DESC;"
+```
 
-# Is Celery scraping successfully?
-docker-compose logs --tail=20 celery-worker
-
-# What queries are cached in Redis?
+### 3. Manage the Redis Cache
+To inspect or clear cached API responses:
+```powershell
+# List all active cache keys currently saved in Redis memory
 docker-compose exec redis redis-cli KEYS "*"
 
-# Check Node.js API is live
+# Forcefully flush the entire Redis cache (clears all cached feeds immediately)
+docker-compose exec redis redis-cli FLUSHALL
+```
+
+### 4. Rebuild & Restart Services
+If you make code edits, you must rebuild the target service container for the changes to apply:
+```powershell
+# Rebuild and restart the Django/Celery scrapers after modifying Python code
+docker-compose up -d --build django-admin celery-worker celery-beat
+
+# Rebuild and restart the Node API Gateway after modifying server.ts or services
+docker-compose up -d --build node-api
+
+# Rebuild and restart the React UI after modifying frontend code
+docker-compose up -d --build frontend
+```
+
+### 5. Check Endpoint Liveness
+```powershell
+# Check Node.js API liveness
 curl http://localhost/health
 
-# View Django Admin Panel
+# Open Django Admin Panel in browser (Windows)
 start http://localhost/admin
 ```
 
