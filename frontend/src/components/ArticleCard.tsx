@@ -1,7 +1,5 @@
 import type { Article } from '../services/api';
 import { ExternalLink, ImageOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useStore } from '../store/useStore';
 
 interface Props {
     article: Article;
@@ -26,15 +24,6 @@ const categoryGradient: Record<string, string> = {
 export const ArticleCard: React.FC<Props> = ({ article, viewMode }) => {
     const isList = viewMode === 'list';
     const gradient = categoryGradient[article.category] ?? 'from-slate-700 to-slate-900';
-    const navigate = useNavigate();
-    const { token } = useStore();
-
-    const handleCardClick = (e: React.MouseEvent) => {
-        if (!token) {
-            e.preventDefault();
-            navigate('/login');
-        }
-    };
 
     // Calculate relative time
     const getRelativeTime = (dateString: string) => {
@@ -52,19 +41,18 @@ export const ArticleCard: React.FC<Props> = ({ article, viewMode }) => {
             href={article.url}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={handleCardClick}
             className={`
                 block bg-surface rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group
-                ${isList ? 'flex flex-row h-48' : 'flex flex-col'}
+                ${isList ? 'flex flex-row min-h-[12rem]' : 'flex flex-col h-full'}
             `}
         >
             {/* Image / Fallback */}
-            <div className={`relative overflow-hidden ${isList ? 'w-64 h-full flex-shrink-0' : 'w-full h-48'}`}>
+            <div className={`relative overflow-hidden ${isList ? 'w-64 flex-shrink-0' : 'w-full h-48'}`}>
                 {article.image_url ? (
                     <img
                         src={article.image_url}
                         alt={article.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
                             // If the real image fails to load, swap in the gradient fallback
                             const el = e.currentTarget;
@@ -73,12 +61,12 @@ export const ArticleCard: React.FC<Props> = ({ article, viewMode }) => {
                         }}
                     />
                 ) : (
-                    <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
                         <ImageOff size={32} className="text-white/20" />
                     </div>
                 )}
                 {/* Category pill overlay on image */}
-                <span className="absolute top-2 left-2 text-[9px] font-bold tracking-wider bg-black/60 text-white px-2 py-1 rounded uppercase backdrop-blur-sm">
+                <span className="absolute top-2 left-2 z-10 text-[9px] font-bold tracking-wider bg-black/60 text-white px-2 py-1 rounded uppercase backdrop-blur-sm">
                     {article.category}
                 </span>
             </div>

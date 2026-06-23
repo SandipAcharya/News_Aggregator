@@ -5,11 +5,7 @@ import { ArticleFeed } from './components/ArticleFeed';
 import { useStore } from './store/useStore';
 import { Sun, Moon, Search, LayoutGrid, List, Menu, X, LogOut, LogIn } from 'lucide-react';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { refetchOnWindowFocus: false, retry: 1 },
-  },
-});
+
 
 function App() {
   const {
@@ -21,6 +17,27 @@ function App() {
 
   const [inputValue, setInputValue] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [time, setTime] = useState(new Date());
+
+useEffect(() => {
+  const timer = setInterval(() => setTime(new Date()), 1000);
+  return () => clearInterval(timer);
+}, []);
+
+const englishTime = time.toLocaleTimeString('en-US', {
+  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
+});
+
+const englishDate = time.toLocaleDateString('en-US', {
+  year: 'numeric', month: 'short', day: 'numeric',
+});
+
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { refetchOnWindowFocus: false, retry: 1 },
+  },
+});
 
   const requireAuth = (action: () => void) => {
     if (!token) {
@@ -60,14 +77,22 @@ function App() {
             >
               <Menu size={22} />
             </button>
-            <h1 className="text-xl sm:text-2xl font-bold text-text-main tracking-tight whitespace-nowrap">
-              News Aggregator
-            </h1>
-            <span className="text-xs font-semibold text-text-muted hidden lg:block whitespace-nowrap border border-border rounded-full px-3 py-1">
-              KAFAL CARE
-            </span>
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo.jpeg"
+                alt="Bichar Bimarsh Media Logo"
+                className="h-10 w-10 rounded-full object-cover shrink-0"
+              />
+              <div className="flex flex-col justify-center">
+                <h1 className="text-xl sm:text-2xl font-bold text-text-main tracking-tight leading-tight">
+                  Bichar Bimarsh Media
+                </h1>
+                <div className="flex items-center gap-3 text-xs font-mono leading-tight">
+                  <span className="text-text-muted">{englishDate} &nbsp;{englishTime}</span>
+                </div>
+              </div>
+            </div>  
           </div>
-
           {/* Centre: Search Bar */}
           <div className="relative flex-1 max-w-xl hidden md:block">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
