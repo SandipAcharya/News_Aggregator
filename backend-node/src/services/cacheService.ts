@@ -28,8 +28,17 @@ export const connectCache = async () => {
     }
 };
 
+const memoryCache = new Map<string, { data: any, expiresAt: number }>();
+
 export const getCache = async (key: string) => {
-    if (!isConnected) return null;
+    if (!isConnected) {
+        const item = memoryCache.get(key);
+        if (item && item.expiresAt > Date.now()) {
+            return item.data;
+        }
+        memoryCache.delete(key);
+        return null;
+    }
     try {
         const data = await redisClient.get(key);
         return data ? JSON.parse(data) : null;
@@ -39,10 +48,26 @@ export const getCache = async (key: string) => {
 };
 
 export const setCache = async (key: string, data: any, ttlInSeconds: number) => {
-    if (!isConnected) return;
+    if (!isConnected) {
+        memoryCache.set(key, { data, expiresAt: Date.now() + (ttlInSeconds * 1000) });
+        return;
+    }
     try {
         await redisClient.setEx(key, ttlInSeconds, JSON.stringify(data));
     } catch {
-        // silently skip
+        // fallback if redis fails unexpectedly
+        memoryCache.set(key, { data, expiresAt: Date.now() + (ttlInSeconds * 1000) });
+    }
+};
+
+export const deleteCache = async (key: string) => {
+    if (!isConnected) {
+        memoryCache.delete(key);
+        return;
+    }
+    try {
+        await redisClient.del(key);
+    } catch {
+        memoryCache.delete(key);
     }
 };

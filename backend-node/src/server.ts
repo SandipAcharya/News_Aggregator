@@ -5,9 +5,12 @@ import newsRoutes from './routes/newsRoutes';
 import authRoutes from './routes/authRoutes';
 import { connectCache } from './services/cacheService';
 
+import cookieParser from 'cookie-parser';
+
 dotenv.config();
 
 const app = express();
+app.use(cookieParser());
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
 // Middleware

@@ -5,6 +5,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,
+    withCredentials: true, // Send HTTP-Only cookies
     headers: {
         'Content-Type': 'application/json',
     },
@@ -20,6 +21,39 @@ apiClient.interceptors.request.use(
         return config;
     },
     (error) => Promise.reject(error)
+);
+
+// Response interceptor for token refresh
+apiClient.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        
+        // Prevent infinite loops if the refresh token endpoint itself fails
+        // Also don't try to refresh if the original request was a login attempt!
+        const isAuthEndpoint = originalRequest.url?.includes('/auth/refresh-token') || originalRequest.url?.includes('/auth/login');
+        
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+            originalRequest._retry = true;
+            try {
+                // Try to refresh token
+                const refreshResponse = await apiClient.post('/auth/refresh-token');
+                const newToken = refreshResponse.data.token;
+                
+                // Update store
+                useStore.getState().setToken(newToken);
+                
+                // Update header and retry
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                return apiClient(originalRequest);
+            } catch (refreshError) {
+                // Refresh token failed or expired
+                useStore.getState().logout();
+                return Promise.reject(refreshError);
+            }
+        }
+        return Promise.reject(error);
+    }
 );
 
 // Full article payload shape from Node.js API
@@ -61,7 +95,6 @@ export const fetchArticles = async (params: FetchArticlesParams): Promise<Articl
     if (params.endDate)    query.append('endDate',    params.endDate);
 
     const response = await apiClient.get(`/news?${query.toString()}`);
-    // Node API returns { data: [...], source: "cache"|"database" }
     return response.data.data;
 };
 
@@ -74,6 +107,16 @@ export const login = async (email: string, password: string) => {
 
 export const signup = async (email: string, password: string, username: string) => {
     const response = await apiClient.post('/auth/signup', { email, password, username });
+    return response.data;
+};
+
+export const verifyOtp = async (email: string, otp: string) => {
+    const response = await apiClient.post('/auth/verify-otp', { email, otp });
+    return response.data;
+};
+
+export const logout = async () => {
+    const response = await apiClient.post('/auth/logout');
     return response.data;
 };
 

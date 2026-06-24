@@ -8,23 +8,16 @@ from .tasks import generate_article_summary
 @csrf_exempt
 @require_http_methods(["POST"])
 def trigger_summary(request, article_id):
-    """
-    Synchronously generates an AI summary if it doesn't exist.
-    Called internally by the Node.js API on a cache miss.
-    """
     try:
-        # Check if already exists
         article = Article.objects.get(id=article_id)
         if hasattr(article, 'ai_summary'):
             summary = article.ai_summary
         else:
-            # Generate synchronously for immediate return
-            generate_article_summary(article_id) # Call the function directly (sync), not .delay()
+            generate_article_summary(article_id)
             article.refresh_from_db()
             if not hasattr(article, 'ai_summary'):
                 return JsonResponse({"error": "Failed to generate summary"}, status=500)
             summary = article.ai_summary
-
         return JsonResponse({
             "bullet_points": summary.bullet_points,
             "sentiment": summary.sentiment,

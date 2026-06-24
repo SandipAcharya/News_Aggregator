@@ -42,8 +42,11 @@ services:
       - node-api
       - django-admin
 
+
   node-api:
     build: ./backend-node
+    env_file:
+      - ./backend-node/.env
     environment:
       - DATABASE_URL=postgresql://news_user:news_password@db:5432/news_db
       - REDIS_URL=redis://redis:6379

@@ -107,6 +107,7 @@ export const fetchNewsArticles = async (filters: NewsFilters = {}) => {
     try {
         const result = await pool.query(query, params);
         return result.rows;
+
     } catch (err) {
         console.error("Database query failed:");
         console.error("Query:", query);
