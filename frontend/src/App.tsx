@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Routes, Route } from 'react-router-dom';
 import { Filters } from './components/Filters';
 import { ArticleFeed } from './components/ArticleFeed';
+import { ArticleSummary } from './pages/ArticleSummary';
 import { useStore } from './store/useStore';
 import { Sun, Moon, Search, LayoutGrid, List, Menu, X, LogOut, LogIn } from 'lucide-react';
 
@@ -214,8 +216,11 @@ const queryClient = new QueryClient({
 
           {/* Main Feed */}
           <main className="flex-1 overflow-y-auto bg-background">
-            <div className="px-4 sm:px-6 py-6">
-              <ArticleFeed />
+            <div className="px-4 sm:px-6 py-6 h-full">
+              <Routes>
+                <Route path="/" element={<ArticleFeed />} />
+                <Route path="/article/:id" element={<ArticleSummary />} />
+              </Routes>
             </div>
           </main>
         </div>

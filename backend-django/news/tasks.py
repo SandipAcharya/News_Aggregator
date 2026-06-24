@@ -1,4 +1,9 @@
 from celery import shared_task
+import json
+import os
+import trafilatura
+from groq import Groq
+from .models import ArticleSummary
 import feedparser
 from .models import NewsSource, Article
 from django.utils import timezone
@@ -133,3 +138,90 @@ def scrape_rss_feeds():
             new_articles_count += 1
 
     return f"Scraped {new_articles_count} new articles."
+
+@shared_task
+def generate_article_summary(article_id):
+    """
+    Fetch full article text using trafilatura and generate a JSON summary using Groq Llama 3.3.
+    """
+    try:
+        article = Article.objects.get(id=article_id)
+        if hasattr(article, 'ai_summary'):
+            return "Summary already exists"
+
+        # 1. Fetch full body
+        downloaded = trafilatura.fetch_url(article.url)
+        full_text = trafilatura.extract(downloaded) if downloaded else None
+        
+        if not full_text:
+            full_text = article.raw_content
+            
+        article.full_content = full_text
+        article.save(update_fields=['full_content'])
+
+        # 2. Call Groq
+        groq_api_key = os.environ.get("GROQ_API_KEY")
+        if not groq_api_key:
+            return "GROQ_API_KEY not set"
+            
+        client = Groq(api_key=groq_api_key)
+        
+        prompt = f"""
+You are a professional news editor. Analyze this article and respond ONLY with valid JSON.
+
+Article Title: {article.title}
+Article Source: {article.source.name}
+Article Body: {full_text}
+
+Respond with this exact JSON structure (no markdown tags, just raw JSON):
+{{
+  "summary_paragraphs": [
+    "First paragraph: A comprehensive 3-5 sentence introduction covering the main event, key figures, and immediate context.",
+    "Second paragraph: A detailed 3-5 sentence explanation of the background, implications, and any statements made by authorities or involved parties.",
+    "Third paragraph (optional): A 2-4 sentence conclusion regarding future steps, broader impact, or related ongoing events."
+  ],
+  "sentiment": "Positive" or "Neutral" or "Negative" or "Mixed",
+  "sentiment_reason": "Brief explanation of the sentiment",
+  "key_people": ["Person 1", "Person 2"],
+  "key_places": ["Location 1"],
+  "key_organizations": ["Org 1", "Org 2"],
+  "reading_time_mins": 3,
+  "complexity": "Beginner" or "Intermediate" or "Expert"
+}}
+"""
+        response = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+            temperature=0.2,
+            response_format={"type": "json_object"}
+        )
+        
+        result_json = json.loads(response.choices[0].message.content)
+        
+        # 3. Save Summary
+        ArticleSummary.objects.create(
+            article=article,
+            bullet_points=[], # Leaving empty since we switched to paragraphs
+            sentiment=result_json.get("sentiment", "Neutral"),
+            sentiment_reason=result_json.get("sentiment_reason", ""),
+            key_entities={
+                "people": result_json.get("key_people", []),
+                "places": result_json.get("key_places", []),
+                "orgs": result_json.get("key_organizations", []),
+                "summary_paragraphs": result_json.get("summary_paragraphs", [])
+            },
+            reading_time_mins=result_json.get("reading_time_mins", 1),
+            complexity=result_json.get("complexity", "Intermediate"),
+            ai_model="llama-3.3-70b-versatile",
+            tokens_used=response.usage.total_tokens if response.usage else None
+        )
+        
+        article.status = 'enriched'
+        article.save(update_fields=['status'])
+        
+        return f"Summary generated for {article.title}"
+        
+    except Exception as e:
+        print(f"Failed to generate summary for {article_id}: {str(e)}")
+        # Fallback to HuggingFace could go here
+        return f"Error: {str(e)}"

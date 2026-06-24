@@ -1,5 +1,6 @@
 import type { Article } from '../services/api';
-import { ExternalLink, ImageOff } from 'lucide-react';
+import { ArrowRight, ImageOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Props {
     article: Article;
@@ -37,10 +38,8 @@ export const ArticleCard: React.FC<Props> = ({ article, viewMode }) => {
     };
 
     return (
-        <a
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
+        <Link
+            to={`/article/${article.id}`}
             className={`
                 block bg-surface rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group
                 ${isList ? 'flex flex-row min-h-[12rem]' : 'flex flex-col h-full'}
@@ -104,10 +103,10 @@ export const ArticleCard: React.FC<Props> = ({ article, viewMode }) => {
                         {getRelativeTime(article.published_at)}
                     </span>
                     <span className="text-xs font-bold text-primary flex items-center gap-1 group-hover:text-orange-500 transition-colors">
-                        Read More <ExternalLink size={12} />
+                        View Summary <ArrowRight size={14} />
                     </span>
                 </div>
             </div>
-        </a>
+        </Link>
     );
 };

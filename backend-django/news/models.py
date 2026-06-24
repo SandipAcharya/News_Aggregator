@@ -53,6 +53,18 @@ class Article(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # CMS Workflow Fields
+    STATUS_CHOICES = [
+        ('auto_scraped', 'Auto Scraped'),
+        ('enriched', 'Enriched'),
+        ('editorial_reviewed', 'Editorial Reviewed'),
+        ('published', 'Published'),
+        ('rejected', 'Rejected'),
+    ]
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='auto_scraped', db_index=True)
+    is_featured = models.BooleanField(default=False, db_index=True)
+    full_content = models.TextField(null=True, blank=True, help_text="Full scraped body (from trafilatura)")
+
     class Meta:
         ordering = ['-published_at']
         indexes = [
@@ -61,3 +73,22 @@ class Article(models.Model):
 
     def __str__(self):
         return self.title
+
+class ArticleSummary(models.Model):
+    """
+    AI-generated summary for the article.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    article = models.OneToOneField(Article, on_delete=models.CASCADE, related_name='ai_summary')
+    bullet_points = models.JSONField(help_text='["point1", "point2", ...]')
+    sentiment = models.CharField(max_length=50)
+    sentiment_reason = models.TextField(null=True, blank=True)
+    key_entities = models.JSONField(help_text='{"people": [], "places": [], "orgs": []}')
+    reading_time_mins = models.IntegerField(default=1)
+    complexity = models.CharField(max_length=50, null=True, blank=True)
+    ai_model = models.CharField(max_length=100) # Replaced gemini_model with ai_model
+    generated_at = models.DateTimeField(auto_now_add=True)
+    tokens_used = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Summary for {self.article.title}"

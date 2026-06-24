@@ -1,6 +1,7 @@
 import { getDemoArticles } from './demoDataService';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import axios from 'axios';
 
 dotenv.config();
 
@@ -115,3 +116,44 @@ export const fetchNewsArticles = async (filters: NewsFilters = {}) => {
     }
 };
 
+export const fetchArticleById = async (id: string) => {
+    const query = `
+        SELECT
+            a.id, a.title, a.url, a.image_url, a.category, a.language,
+            a.political_leaning, a.published_at,
+            s.name AS source_name,
+            s.country AS country,
+            s.source_type AS source_type
+        FROM news_article a
+        JOIN news_newssource s ON a.source_id = s.id
+        WHERE a.id = $1
+    `;
+    const result = await pool.query(query, [id]);
+    if (result.rows.length === 0) return null;
+    return result.rows[0];
+};
+
+export const triggerArticleSummary = async (id: string) => {
+    // 1. First, check if summary exists in DB
+    const checkQuery = `
+        SELECT bullet_points, sentiment, sentiment_reason, key_entities, reading_time_mins, complexity
+        FROM news_articlesummary
+        WHERE article_id = $1
+    `;
+    const checkResult = await pool.query(checkQuery, [id]);
+    if (checkResult.rows.length > 0) {
+        return checkResult.rows[0];
+    }
+
+    // 2. If not, trigger Django synchronously
+    try {
+        console.log(`[Node] Triggering Django summary generation for ${id}`);
+        // Communicate with internal django-admin container over Docker network
+        const djangoUrl = `http://django-admin:8000/internal/api/articles/${id}/summary`;
+        const response = await axios.post(djangoUrl);
+        return response.data;
+    } catch (err: any) {
+        console.error("[Node] Failed to generate summary from Django:", err?.response?.data || err.message);
+        throw new Error("Failed to generate article summary");
+    }
+};
