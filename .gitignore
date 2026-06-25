@@ -16,3 +16,6 @@ backend-django/db.sqlite3
 # OS
 .DS_Store
 Thumbs.db
+
+# Ignore the updated version subfolder
+News_Aggregator1/

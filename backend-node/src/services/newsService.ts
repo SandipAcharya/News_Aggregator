@@ -158,3 +158,69 @@ export const triggerArticleSummary = async (id: string) => {
         throw new Error("Failed to generate article summary");
     }
 };
+
+import crypto from 'crypto';
+
+export const createArticle = async (data: any) => {
+    // 1. Get or Create Source
+    let sourceId;
+    const sourceName = data.source_name || 'Bichar Bimarsh Editorial';
+    
+    const sourceCheckQuery = 'SELECT id FROM news_newssource WHERE name = $1 LIMIT 1';
+    const sourceCheckResult = await pool.query(sourceCheckQuery, [sourceName]);
+    
+    if (sourceCheckResult.rows.length > 0) {
+        sourceId = sourceCheckResult.rows[0].id;
+    } else {
+        const newSourceId = crypto.randomUUID();
+        const insertSourceQuery = `
+            INSERT INTO news_newssource (id, name, url, rss_feed_url, source_type, is_active, created_at)
+            VALUES ($1, $2, $3, $4, 'blog', true, NOW())
+            RETURNING id
+        `;
+        const urlSlug = sourceName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const sUrl = `https://bicharbimarsh.com/author/${urlSlug}`;
+        await pool.query(insertSourceQuery, [newSourceId, sourceName, sUrl, sUrl + '/rss']);
+        sourceId = newSourceId;
+    }
+
+    // 2. Insert Article
+    const articleId = crypto.randomUUID();
+    const articleUrl = `https://bicharbimarsh.com/article/${articleId}`;
+    
+    const insertQuery = `
+        INSERT INTO news_article (
+            id, source_id, title, url, image_url, raw_content, full_content, 
+            category, language, political_leaning, status, is_featured, published_at, created_at, updated_at
+        ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW(), NOW()
+        ) RETURNING id
+    `;
+    
+    // Map status 'auto_scraped' to 'published' for manual entries, and 'draft' to 'rejected' just for temporary logic, or we can use 'auto_scraped' as requested by the frontend
+    const mappedStatus = data.status === 'draft' ? 'draft' : 'auto_scraped';
+
+    const values = [
+        articleId,
+        sourceId,
+        data.title,
+        articleUrl,
+        data.image_url || null,
+        data.excerpt || '',
+        data.content || '',
+        data.category || 'General',
+        data.language || 'en',
+        data.political_leaning || 'Center',
+        mappedStatus,
+        false
+    ];
+
+    const result = await pool.query(insertQuery, values);
+    
+    // Trigger summary generation asynchronously
+    if (mappedStatus !== 'draft') {
+        triggerArticleSummary(articleId).catch(console.error);
+    }
+    
+    return { id: articleId, message: "Article created successfully" };
+};

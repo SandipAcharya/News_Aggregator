@@ -4,10 +4,11 @@ import { Routes, Route } from 'react-router-dom';
 import { Filters } from './components/Filters';
 import { ArticleFeed } from './components/ArticleFeed';
 import { ArticleSummary } from './pages/ArticleSummary';
+import { ArticleComposer } from './pages/ArticleComposer';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { Login } from './pages/Login';
 import { useStore } from './store/useStore';
-import { Sun, Moon, Search, LayoutGrid, List, Menu, X, LogOut, LogIn } from 'lucide-react';
+import { Sun, Moon, Search, LayoutGrid, List, Menu, X, LogOut, LogIn, PenSquare } from 'lucide-react';
 
 
 
@@ -152,6 +153,16 @@ const queryClient = new QueryClient({
             </button>
 
             {/* Auth Button */}
+            {token && (
+              <a
+                href="/compose"
+                title="Compose Article"
+                className="w-9 h-9 rounded-lg bg-background flex items-center justify-center text-text-muted hover:text-text-main border border-border transition-colors"
+              >
+                <PenSquare size={18} />
+              </a>
+            )}
+
             {token ? (
               <button
                 onClick={logout}
@@ -222,6 +233,7 @@ const queryClient = new QueryClient({
               <Routes>
                 <Route path="/" element={<ArticleFeed />} />
                 <Route path="/article/:id" element={<ArticleSummary />} />
+                <Route path="/compose" element={<ArticleComposer />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
               </Routes>

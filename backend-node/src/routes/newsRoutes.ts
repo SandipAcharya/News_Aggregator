@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { fetchNewsArticles, fetchArticleById, triggerArticleSummary } from '../services/newsService';
+import { fetchNewsArticles, fetchArticleById, triggerArticleSummary, createArticle } from '../services/newsService';
 import { getCache, setCache } from '../services/cacheService';
 import { validateNewsQuery } from '../validators/newsValidators';
 
@@ -96,6 +96,16 @@ router.get('/articles/:id/summary', async (req: Request, res: Response) => {
     } catch (error) {
         console.error("[Article Summary Error]", error);
         res.status(500).json({ error: "Failed to fetch or generate summary" });
+    }
+});
+
+router.post('/articles', async (req: Request, res: Response) => {
+    try {
+        const result = await createArticle(req.body);
+        res.json(result);
+    } catch (error) {
+        console.error("[Create Article Error]", error);
+        res.status(500).json({ error: "Failed to create article" });
     }
 });
 
