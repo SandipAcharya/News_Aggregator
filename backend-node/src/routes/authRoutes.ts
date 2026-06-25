@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { generateToken, generateRefreshToken, verifyRefreshToken, hashPassword, comparePassword } from '../services/authService';
-import { sendOTP } from '../services/emailService';
+import { sendOTP, sendPasswordResetOTP } from '../services/emailService';
 import { getCache, setCache, deleteCache } from '../services/cacheService';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
@@ -253,6 +253,166 @@ router.put('/preferences', requireAuth, async (req: AuthRequest, res: Response) 
     } catch (error) {
         console.error("[User] Update preferences failed:", error);
         res.status(500).json({ error: "Failed to update preferences" });
+    }
+});
+
+// ── POST /api/auth/forgot-password ───────────────────────────────────────────
+router.post('/forgot-password', async (req: Request, res: Response) => {
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+    }
+
+    try {
+        const userResult = await pool.query('SELECT id FROM auth_user WHERE email = $1', [email]);
+        
+        if (userResult.rows.length === 0) {
+            return res.json({ message: "If that email is registered, you will receive a reset OTP shortly." });
+        }
+        
+        const userId = userResult.rows[0].id;
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const hashedOTP = await hashPassword(otpCode);
+        const expiresAt = new Date(Date.now() + 10 * 60000); // 10 minutes
+        
+        await pool.query(
+            `UPDATE users_userprofile 
+             SET reset_password_otp = $1, 
+                 reset_password_otp_expires = $2, 
+                 reset_password_attempts = 0, 
+                 reset_password_verified = false,
+                 updated_at = NOW()
+             WHERE user_id = $3`,
+            [hashedOTP, expiresAt, userId]
+        );
+        
+        await sendPasswordResetOTP(email, otpCode);
+        
+        res.json({ message: "If that email is registered, you will receive a reset OTP shortly." });
+    } catch (error) {
+        console.error("[Auth] Forgot password failed:", error);
+        res.status(500).json({ error: "Failed to process request." });
+    }
+});
+
+// ── POST /api/auth/verify-reset-otp ──────────────────────────────────────────
+router.post('/verify-reset-otp', async (req: Request, res: Response) => {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+        return res.status(400).json({ error: "Email and OTP are required" });
+    }
+
+    try {
+        const result = await pool.query(
+            `SELECT u.id, p.reset_password_otp, p.reset_password_otp_expires, p.reset_password_attempts 
+             FROM auth_user u
+             JOIN users_userprofile p ON p.user_id = u.id
+             WHERE u.email = $1`,
+            [email]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: "Invalid request." });
+        }
+
+        const user = result.rows[0];
+
+        if (!user.reset_password_otp || !user.reset_password_otp_expires) {
+            return res.status(400).json({ error: "No reset request found or OTP expired." });
+        }
+
+        if (user.reset_password_attempts >= 5) {
+            return res.status(403).json({ error: "Too many failed attempts. Please request a new OTP." });
+        }
+
+        if (new Date() > new Date(user.reset_password_otp_expires)) {
+            return res.status(400).json({ error: "OTP has expired." });
+        }
+
+        const isMatch = await comparePassword(otp, user.reset_password_otp);
+        
+        if (!isMatch) {
+            await pool.query(
+                'UPDATE users_userprofile SET reset_password_attempts = reset_password_attempts + 1 WHERE user_id = $1',
+                [user.id]
+            );
+            return res.status(400).json({ error: "Invalid OTP." });
+        }
+
+        await pool.query(
+            'UPDATE users_userprofile SET reset_password_verified = true, updated_at = NOW() WHERE user_id = $1',
+            [user.id]
+        );
+
+        res.json({ message: "OTP verified successfully. You may now reset your password." });
+    } catch (error) {
+        console.error("[Auth] Verify reset OTP failed:", error);
+        res.status(500).json({ error: "Failed to verify OTP." });
+    }
+});
+
+// ── POST /api/auth/reset-password ────────────────────────────────────────────
+router.post('/reset-password', async (req: Request, res: Response) => {
+    const { email, otp, newPassword, confirmPassword } = req.body;
+    
+    if (!email || !otp || !newPassword || !confirmPassword) {
+        return res.status(400).json({ error: "All fields are required." });
+    }
+
+    if (newPassword !== confirmPassword) {
+        return res.status(400).json({ error: "Passwords do not match." });
+    }
+
+    try {
+        const result = await pool.query(
+            `SELECT u.id, p.reset_password_otp, p.reset_password_otp_expires, p.reset_password_verified 
+             FROM auth_user u
+             JOIN users_userprofile p ON p.user_id = u.id
+             WHERE u.email = $1`,
+            [email]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: "Invalid request." });
+        }
+
+        const user = result.rows[0];
+
+        if (!user.reset_password_verified) {
+            return res.status(403).json({ error: "OTP must be verified first." });
+        }
+
+        if (new Date() > new Date(user.reset_password_otp_expires)) {
+            return res.status(400).json({ error: "Reset session has expired. Please request a new OTP." });
+        }
+
+        const isMatch = await comparePassword(otp, user.reset_password_otp);
+        if (!isMatch) {
+            return res.status(400).json({ error: "Invalid OTP." });
+        }
+
+        const hashedPassword = await hashPassword(newPassword);
+
+        await pool.query(
+            'UPDATE auth_user SET password = $1 WHERE id = $2',
+            [`bcrypt$$${hashedPassword}`, user.id]
+        );
+
+        await pool.query(
+            `UPDATE users_userprofile 
+             SET reset_password_otp = NULL, 
+                 reset_password_otp_expires = NULL, 
+                 reset_password_attempts = 0, 
+                 reset_password_verified = false,
+                 updated_at = NOW()
+             WHERE user_id = $1`,
+            [user.id]
+        );
+
+        res.json({ message: "Password has been reset successfully. You can now log in." });
+    } catch (error) {
+        console.error("[Auth] Reset password failed:", error);
+        res.status(500).json({ error: "Failed to reset password." });
     }
 });
 

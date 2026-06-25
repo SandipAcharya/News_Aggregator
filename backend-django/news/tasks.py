@@ -94,8 +94,9 @@ def scrape_rss_feeds():
             # Parse publish date
             published_at = timezone.now()
             if hasattr(entry, 'published_parsed') and entry.published_parsed:
+                import calendar
                 published_at = datetime.datetime.fromtimestamp(
-                    time.mktime(entry.published_parsed),
+                    calendar.timegm(entry.published_parsed),
                     tz=datetime.timezone.utc
                 )
 

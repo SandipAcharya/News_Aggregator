@@ -169,7 +169,13 @@ export const Login = () => {
                                 <div className="flex items-center justify-between mb-2">
                                     <label className="block text-sm font-semibold text-text-main">Password</label>
                                     {isLoginMode && (
-                                        <a href="#" className="text-sm font-medium text-primary hover:text-orange-500 transition-colors">Forgot password?</a>
+                                        <button 
+                                            type="button"
+                                            onClick={() => navigate('/forgot-password')}
+                                            className="text-sm font-medium text-primary hover:text-orange-500 transition-colors"
+                                        >
+                                            Forgot password?
+                                        </button>
                                     )}
                                 </div>
                                 <input 

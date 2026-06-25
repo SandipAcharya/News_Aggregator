@@ -17,7 +17,7 @@ router.get('/news', validateNewsQuery, async (req: Request, res: Response) => {
         const endDate    = req.query.endDate      as string | undefined;
 
         // Build a unique cache key covering all dimensions
-        const CACHE_VERSION = 'v5';
+        const CACHE_VERSION = 'v6';
         const cacheKey = [
             CACHE_VERSION,
             category    || 'all',
@@ -44,7 +44,7 @@ router.get('/news', validateNewsQuery, async (req: Request, res: Response) => {
         // 3. Smart TTL: unfiltered general = 1hr, search queries = 2min, everything else = 5min
         let ttl = 300; // 5 minutes default
         if (!category && !leaning && !language && !country && !sourceType && !search && !startDate && !endDate) {
-            ttl = 3600; // 1 hour for the full unfiltered feed
+            ttl = 300; // 5 minutes for the full unfiltered feed (changed from 1 hour)
         } else if (search) {
             ttl = 120; // 2 min for search (results change as new articles arrive)
         }
