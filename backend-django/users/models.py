@@ -18,6 +18,13 @@ class UserProfile(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
     preferences = models.JSONField(default=dict, blank=True, help_text="User specific feed preferences")
     email_verified = models.BooleanField(default=False)
+    
+    # Password Reset OTP Fields
+    reset_password_otp = models.CharField(max_length=100, blank=True, null=True, help_text="Bcrypt hash of reset OTP")
+    reset_password_otp_expires = models.DateTimeField(blank=True, null=True)
+    reset_password_attempts = models.IntegerField(default=0)
+    reset_password_verified = models.BooleanField(default=False)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

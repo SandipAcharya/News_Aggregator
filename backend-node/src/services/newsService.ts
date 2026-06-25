@@ -75,9 +75,9 @@ export const fetchNewsArticles = async (filters: NewsFilters = {}) => {
     }
 
     if (search) {
-        // Boolean-style ILIKE full-text search on title + raw_content
+        // Boolean-style ILIKE full-text search on title + raw_content + source_name
         params.push(`%${search}%`);
-        conditions.push(`(a.title ILIKE $${params.length} OR a.raw_content ILIKE $${params.length})`);
+        conditions.push(`(a.title ILIKE $${params.length} OR a.raw_content ILIKE $${params.length} OR s.name ILIKE $${params.length})`);
     }
 
     if (startDate) {

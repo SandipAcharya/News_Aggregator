@@ -4,6 +4,8 @@ import { Routes, Route } from 'react-router-dom';
 import { Filters } from './components/Filters';
 import { ArticleFeed } from './components/ArticleFeed';
 import { ArticleSummary } from './pages/ArticleSummary';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { Login } from './pages/Login';
 import { useStore } from './store/useStore';
 import { Sun, Moon, Search, LayoutGrid, List, Menu, X, LogOut, LogIn } from 'lucide-react';
 
@@ -220,6 +222,8 @@ const queryClient = new QueryClient({
               <Routes>
                 <Route path="/" element={<ArticleFeed />} />
                 <Route path="/article/:id" element={<ArticleSummary />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
               </Routes>
             </div>
           </main>
