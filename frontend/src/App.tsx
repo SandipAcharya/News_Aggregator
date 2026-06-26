@@ -232,32 +232,7 @@ function App() {
 
             {/* Right: controls */}
             <div className="flex items-center gap-2 shrink-0">
-              {/* View Toggles */}
-              <div className="hidden sm:flex items-center gap-1 p-1 bg-background border border-border rounded-lg">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-text-muted hover:text-text-main'}`}
-                  aria-label="Grid view"
-                >
-                  <LayoutGrid size={14} />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`w-7 h-7 rounded flex items-center justify-center transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-text-muted hover:text-text-main'}`}
-                  aria-label="List view"
-                >
-                  <List size={14} />
-                </button>
-              </div>
 
-              {/* Dark mode toggle */}
-              <button
-                onClick={toggleDarkMode}
-                className="w-8 h-8 rounded-lg bg-background flex items-center justify-center text-text-muted hover:text-text-main border border-border transition-colors"
-                aria-label="Toggle dark mode"
-              >
-                {isDarkMode ? <Sun size={15} /> : <Moon size={15} />}
-              </button>
 
               {/* Auth */}
               {token ? (
