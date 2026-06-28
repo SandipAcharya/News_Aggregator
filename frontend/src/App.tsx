@@ -21,11 +21,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route } from 'react-router-dom';
 import { Filters } from './components/Filters';
 import { ArticleFeed } from './components/ArticleFeed';
+import { Footer } from './components/Footer';
 import { ArticleSummary } from './pages/ArticleSummary';
 import { useStore } from './store/useStore';
 import {
-  Sun, Moon, Search, LayoutGrid, List, Menu, X,
-  LogOut, LogIn, Radio,
+  Search, Menu, X,
+  LogOut, LogIn, Radio, ChevronDown
 } from 'lucide-react';
 
 /* ── React Query client — ISR simulation ───────────────────────────────────
@@ -47,7 +48,7 @@ const queryClient = new QueryClient({
 
 /* ── Navigation tabs ───────────────────────────────────────────────────────── */
 const NAV_TABS = [
-  'Home', 'Politics', 'Sports', 'Technology', 'Business', 'Science', 'Health', 'Entertainment', 'World'
+  'Home','Business',  'Health','Politics', 'Technology',  'Science'
 ];
 
 /* ── Ticker headlines (demo — would come from API in production) ──────────── */
@@ -62,18 +63,17 @@ const TICKER_ITEMS = [
 
 function App() {
   const {
-    isDarkMode, toggleDarkMode,
-    viewMode, setViewMode,
+    isDarkMode,
     setSearchQuery,
     token, logout,
     setSelectedCategory,
   } = useStore();
 
-  const [inputValue, setInputValue]   = useState('');
+  const [inputValue, setInputValue]       = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [activeTab, setActiveTab]     = useState('Home');
-  const [time, setTime]               = useState(new Date());
+  const [isSearchOpen, setIsSearchOpen]   = useState(false);
+  const [activeTab, setActiveTab]         = useState('Home');
+  const [time, setTime]                   = useState(new Date());
 
   /**
    * [React Fiber / Concurrent Mode]
@@ -139,122 +139,193 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-background text-text-main flex flex-col pb-10" style={{ fontFamily: 'var(--font-sans)' }}>
 
-        {/* ══ Brand Header & Nav ════════════════════════════════════════════════ */}
-        <header className="bg-surface border-b border-border px-4 sm:px-8 py-3 sticky top-0 z-[60] shadow-sm">
-          <div className="max-w-screen-xl mx-auto flex items-center justify-between gap-4">
+        {/* ══ Top Utility Bar ═══════════════════════════════════════════════ */}
+        <div className="hidden xl:block w-full bg-[#385681] border-b border-white/10" style={{ fontFamily: 'var(--font-sans)' }}>
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-8 flex items-center justify-between h-8">
+            <div className="flex items-center gap-2 text-[12px] text-gray-200 font-medium">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
+              <span>{englishDate} &nbsp;·&nbsp; {englishTime} NPT</span>
+            </div>
+            <div className="flex items-center gap-0">
+              <a href="/about" className="text-[11px] font-bold tracking-wide text-gray-200 hover:text-white transition-colors px-3 py-1 uppercase">About Us</a>
+              <span className="text-gray-400 select-none">|</span>
+              <a href="/contact" className="text-[11px] font-bold tracking-wide text-gray-200 hover:text-white transition-colors px-3 py-1 uppercase">Contact</a>
+              <span className="text-gray-400 select-none">|</span>
+              <a href="/advertise" className="text-[11px] font-bold tracking-wide text-gray-200 hover:text-white transition-colors px-3 py-1 uppercase">Advertise</a>
+            </div>
+          </div>
+        </div>
 
-            {/* Left: Mobile Menu Toggle + Logo */}
-            <div className="flex items-center gap-3 shrink-0">
-              <button
-                onClick={() => {
-                  startTransition(() => setIsSidebarOpen(!isSidebarOpen));
-                }}
-                className="p-2 -ml-2 rounded-lg hover:bg-surface-hover text-text-muted transition-colors xl:hidden"
-                aria-label="Toggle Menu"
-              >
-                {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
+        {/* ══ Main Navbar ═══════════════════════════════════════════════════════ */}
+        <header className="sticky top-0 z-[60] bg-white shadow-lg border-b border-gray-200" style={{ fontFamily: 'var(--font-sans)' }}>
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-8">
+            <div className="flex items-center h-14 gap-4">
 
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-sm overflow-hidden shrink-0 border-2 border-primary flex items-center justify-center bg-primary">
-                  <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover" />
-                </div>
-                <div className="flex flex-col justify-center">
-                  <div className="text-xl sm:text-2xl font-black tracking-tight text-text-main leading-none mb-0.5" style={{ fontFamily: 'var(--font-serif)' }}>
-                    BICHAR BIMARSH
+              {/* Left: Mobile Menu Toggle + Logo */}
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  onClick={() => {
+                    startTransition(() => setIsSidebarOpen(!isSidebarOpen));
+                  }}
+                  className="p-2 -ml-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors xl:hidden"
+                  aria-label="Toggle Menu"
+                >
+                  {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-sm overflow-hidden shrink-0 border-2 border-primary flex items-center justify-center bg-primary">
+                    <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-cover" />
                   </div>
-                  <div className="text-xs font-semibold tracking-[0.25em] text-primary uppercase mb-0.5">
-                    MEDIA
-                  </div>
-                  <div className="text-[10px] text-text-muted font-medium hidden sm:block">
-                    {englishDate} • {englishTime}
+                  <div className="flex flex-col justify-center">
+                    <div className="text-lg sm:text-xl font-black tracking-tight text-gray-900 leading-none" style={{ fontFamily: 'var(--font-serif)' }}>
+                      BICHAR BIMARSH
+                    </div>
+                    <div className="text-[9px] font-bold tracking-[0.3em] text-[#50A0BA] uppercase leading-tight">
+                      MEDIA
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Inline Navigation (Desktop) */}
-            <nav className="hidden xl:flex flex-1 items-center justify-center overflow-x-auto scrollbar-hide mx-4 gap-1">
-              {NAV_TABS.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => handleTabChange(tab)}
-                  className={`
-                    px-3 py-1.5 text-sm font-bold whitespace-nowrap transition-colors rounded-full
-                    ${activeTab === tab
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-text-muted hover:text-text-main hover:bg-surface-hover'}
-                    ${isPending && activeTab === tab ? 'opacity-70' : ''}
-                  `}
-                >
-                  {tab}
-                </button>
-              ))}
-            </nav>
+              {/* Centre: Navigation Tabs (Desktop) */}
+              <nav className="hidden xl:flex flex-1 items-center justify-center gap-1 overflow-visible">
+                {NAV_TABS.map((tab) => {
+                  if (tab === 'Politics') {
+                    return (
+                      <div key={tab} className="relative group">
+                        <button
+                          onClick={() => handleTabChange(tab)}
+                          className={`
+                            flex items-center gap-1 px-3.5 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-all duration-200 rounded
+                            ${['Politics', 'Sports', 'Entertainment'].includes(activeTab)
+                              ? 'bg-[#50A0BA] text-white shadow-md shadow-[#50A0BA]/25'
+                              : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}
+                          `}
+                        >
+                          {tab} <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-200" />
+                        </button>
+                        {/* Dropdown Menu */}
+                        <div className="absolute left-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden transform origin-top scale-95 group-hover:scale-100">
+                          <button
+                            onClick={() => handleTabChange('Sports')}
+                            className={`w-full text-left px-4 py-2.5 text-[13px] font-semibold hover:bg-gray-50 transition-colors ${activeTab === 'Sports' ? 'text-[#50A0BA] bg-[#50A0BA]/5' : 'text-gray-700'}`}
+                          >
+                            Sports
+                          </button>
+                          <button
+                            onClick={() => handleTabChange('Entertainment')}
+                            className={`w-full text-left px-4 py-2.5 text-[13px] font-semibold hover:bg-gray-50 transition-colors ${activeTab === 'Entertainment' ? 'text-[#50A0BA] bg-[#50A0BA]/5' : 'text-gray-700'}`}
+                          >
+                            Entertainment
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
 
-            {/* Centre/Right: search toggle & controls */}
-            <div className="flex justify-end items-center sm:mx-4 mx-2">
-              {isSearchOpen ? (
-                <div className="relative w-full max-w-md animate-fade-in flex items-center">
-                  <input
-                    id="main-search"
-                    autoFocus
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={(e) => {
-                       handleKeyDown(e);
-                       if (e.key === 'Enter') setIsSearchOpen(false);
-                    }}
-                    onClick={() => { if (!token) window.location.href = '/login'; }}
-                    placeholder={token ? 'Search articles…' : 'Sign in to search…'}
-                    readOnly={!token}
-                    className={`w-full h-10 pl-4 pr-12 rounded-full border border-border bg-background text-text-main placeholder-text-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-sm shadow-sm ${!token ? 'cursor-pointer opacity-70' : ''}`}
-                  />
-                  <button
-                    onClick={() => setIsSearchOpen(false)}
-                    className="absolute right-1 top-1 bottom-1 px-3 text-text-muted hover:text-text-main flex items-center justify-center transition-colors bg-surface rounded-full"
-                    aria-label="Close search"
-                  >
-                    <X size={18} />
-                  </button>
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => handleTabChange(tab)}
+                      className={`
+                        px-3.5 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-all duration-200 rounded
+                        ${activeTab === tab
+                          ? 'bg-[#50A0BA] text-white shadow-md shadow-[#50A0BA]/25'
+                          : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}
+                        ${isPending && activeTab === tab ? 'opacity-70' : ''}
+                      `}
+                    >
+                      {tab}
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {/* Right: Search + Auth */}
+              <div className="flex items-center gap-2 shrink-0 ml-auto xl:ml-0">
+                {/* Search */}
+                <div className="flex justify-end items-center">
+                  {isSearchOpen ? (
+                    <div className="relative w-full max-w-md animate-fade-in flex items-center">
+                      <input
+                        id="main-search"
+                        autoFocus
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          handleKeyDown(e);
+                          if (e.key === 'Enter') setIsSearchOpen(false);
+                        }}
+                        onClick={() => { if (!token) window.location.href = '/login'; }}
+                        placeholder={token ? 'Search articles…' : 'Sign in to search…'}
+                        readOnly={!token}
+                        className={`w-full h-9 pl-4 pr-12 rounded-full border border-gray-300 bg-white text-gray-700 placeholder-gray-500 focus:outline-none focus:border-[#50A0BA] focus:ring-1 focus:ring-[#50A0BA] transition-colors text-sm ${!token ? 'cursor-pointer opacity-70' : ''}`}
+                      />
+                      <button
+                        onClick={() => setIsSearchOpen(false)}
+                        className="absolute right-1 top-1 bottom-1 px-3 text-gray-500 hover:text-gray-900 flex items-center justify-center transition-colors rounded-full"
+                        aria-label="Close search"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setIsSearchOpen(true)}
+                      className="p-2 text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100"
+                      aria-label="Toggle Search"
+                    >
+                      <Search size={18} />
+                    </button>
+                  )}
                 </div>
-              ) : (
-                <button
-                  onClick={() => setIsSearchOpen(true)}
-                  className="p-2 text-text-muted hover:text-text-main transition-colors ml-auto mr-2"
-                  aria-label="Toggle Search"
-                >
-                  <Search size={24} />
-                </button>
-              )}
-            </div>
 
-            {/* Right: controls */}
-            <div className="flex items-center gap-2 shrink-0">
+                {/* Auth */}
+                {token ? (
+                  <button
+                    onClick={logout}
+                    title="Log out"
+                    className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 hover:text-red-500 border border-gray-200 transition-colors"
+                  >
+                    <LogOut size={15} />
+                  </button>
+                ) : (
+                  <a
+                    href="/login"
+                    className="flex items-center gap-1.5 px-4 h-8 rounded-full bg-[#50A0BA] text-white text-xs font-bold hover:bg-[#3d7a8e] transition-colors shadow-md shadow-[#50A0BA]/20"
+                  >
+                    <LogIn size={13} />
+                    <span className="hidden sm:inline">Sign In</span>
+                  </a>
+                )}
+              </div>
 
-
-              {/* Auth */}
-              {token ? (
-                <button
-                  onClick={logout}
-                  title="Log out"
-                  className="w-8 h-8 rounded-lg bg-background flex items-center justify-center text-text-muted hover:text-red-500 border border-border transition-colors"
-                >
-                  <LogOut size={15} />
-                </button>
-              ) : (
-                <a
-                  href="/login"
-                  className="flex items-center gap-1.5 px-3 h-8 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-dark transition-colors"
-                >
-                  <LogIn size={13} />
-                  <span className="hidden sm:inline">Sign In</span>
-                </a>
-              )}
             </div>
           </div>
         </header>
+
+        {/* ══ Breaking News Ticker (Just below Navbar) ══════════════════════════════ */}
+        <div className="w-full bg-white dark:bg-surface border-b border-gray-200 shadow-sm overflow-hidden relative z-40">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-8">
+            <div className="flex items-center h-12 gap-3">
+              <div className="flex items-center gap-2 shrink-0 bg-primary text-white px-3 py-1.5 rounded-sm text-xs font-black tracking-wider uppercase">
+                <Radio size={12} className="animate-pulse" />
+                BroadCast
+              </div>
+              <div className="flex-1 overflow-hidden relative">
+                <div className="ticker-track flex items-center">
+                  {tickerContent.map((item, i) => (
+                    <span key={i} className="text-[14px] font-medium text-gray-800 whitespace-nowrap pr-12">
+                      <span className="text-primary mr-2 font-bold">•</span>{item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* ══ Main Layout ═════════════════════════════════════════════════════ */}
         <div className="flex flex-1 overflow-hidden relative">
@@ -269,7 +340,7 @@ function App() {
 
           {/* ── Sliding Drawer Sidebar ────────────────────────────────────────── */}
           <aside
-            className={`fixed inset-y-0 left-0 z-50 w-80 bg-surface shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out pt-[76px] ${
+            className={`fixed inset-y-0 left-0 z-50 w-80 bg-surface shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out pt-[56px] ${
               isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
@@ -320,28 +391,10 @@ function App() {
               </Routes>
             </div>
           </main>
+
         </div>
 
-        {/* ══ Breaking News Ticker (Fixed Footer) ════════════════════════════════════ */}
-        <div className="fixed bottom-0 left-0 right-0 z-[100] bg-surface dark:bg-surface border-t border-border/50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] overflow-hidden">
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-8">
-            <div className="flex items-center h-10 gap-3">
-              <div className="flex items-center gap-2 shrink-0 bg-primary text-white px-3 py-1 rounded-sm text-[10px] font-black tracking-wider uppercase">
-                <Radio size={10} className="animate-pulse" />
-                LIVE
-              </div>
-              <div className="flex-1 overflow-hidden relative">
-                <div className="ticker-track">
-                  {tickerContent.map((item, i) => (
-                    <span key={i} className="text-xs text-text-muted whitespace-nowrap pr-12">
-                      <span className="text-primary mr-2">•</span>{item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <Footer />
       </div>
     </QueryClientProvider>
   );

@@ -493,29 +493,6 @@ export const ArticleFeed = () => {
           />
         </>
       )}
-
-      {/* Newsletter CTA footer (mirrors the reference image) */}
-      <div className="mt-12 bg-secondary dark:bg-surface rounded-xl p-8 text-center">
-        <p className="text-xs font-black tracking-widest text-primary uppercase mb-2">
-          सत्य, तथ्य र निष्पक्ष समाचारका लागि
-        </p>
-        <p className="text-xl font-black text-white dark:text-text-main mb-6" style={{ fontFamily: 'var(--font-serif)' }}>
-          Bichar Bimarsh Media सँग जोडिनुहोस्!
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-          <input
-            type="email"
-            placeholder="Your email address…"
-            className="flex-1 h-11 px-4 rounded-lg border border-white/20 bg-white/10 text-white placeholder-white/40 focus:outline-none focus:border-primary text-sm"
-          />
-          <button className="h-11 px-6 bg-primary hover:bg-primary-dark text-white font-bold rounded-lg text-sm transition-colors whitespace-nowrap">
-            Subscribe
-          </button>
-        </div>
-        <p className="text-[10px] text-white/40 mt-3">
-          I agree to the <a href="#" className="underline">Privacy Policy</a> and <a href="#" className="underline">Terms of Use</a>
-        </p>
-      </div>
     </div>
   );
 };

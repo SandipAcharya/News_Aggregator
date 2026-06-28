@@ -74,7 +74,7 @@ export const Login = () => {
         <div className="min-h-screen bg-background flex">
 
             {/* ── Left decorative panel (desktop only) ─────────────────────── */}
-            <div className="hidden lg:flex lg:w-1/2 bg-secondary dark:bg-surface flex-col justify-between p-12 relative overflow-hidden">
+            <div className="hidden lg:flex lg:w-1/2 bg-primary dark:bg-surface flex-col justify-between p-12 relative overflow-hidden">
                 {/* Background texture — newspaper column lines */}
                 <div className="absolute inset-0 opacity-5" style={{
                     backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 28px, rgba(255,255,255,0.3) 28px, rgba(255,255,255,0.3) 29px)',
@@ -95,16 +95,16 @@ export const Login = () => {
                         </div>
                     </div>
 
-                    <blockquote className="text-white/80 text-xl font-serif leading-relaxed mt-12" style={{ fontFamily: 'var(--font-serif)' }}>
+                    <blockquote className="text-white/100 text-xl font-serif leading-relaxed mt-12" style={{ fontFamily: 'var(--font-serif)' }}>
                         "सत्य, तथ्य र निष्पक्ष समाचार — यही हाम्रो प्रतिबद्धता।"
                     </blockquote>
-                    <p className="text-white/40 text-sm mt-4 font-medium">
+                    <p className="text-white/100 text-sm mt-4 font-medium">
                         Truth, Facts &amp; Unbiased Reporting — Our Commitment.
                     </p>
                 </div>
 
                 {/* Decorative headlines */}
-                <div className="relative z-10 space-y-4 border-t border-white/10 pt-8">
+                <div className="relative z-10 space-y-4 border-t border-white/80 pt-8">
                     {[
                         'AI-Powered News Summaries',
                         'Multi-Source Bias Analysis',

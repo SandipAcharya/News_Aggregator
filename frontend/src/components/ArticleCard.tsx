@@ -27,7 +27,7 @@ import React, { memo } from 'react';
 import type { Article } from '../services/api';
 import { ArrowRight, ImageOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getCategoryChip, relativeTime } from './ArticleFeed';
+import {  relativeTime } from './ArticleFeed';
 
 interface Props {
   article: Article;
@@ -57,13 +57,13 @@ const categoryGradient: Record<string, string> = {
 const ArticleCardInner: React.FC<Props> = ({ article, viewMode }) => {
   const isList   = viewMode === 'list';
   const gradient = categoryGradient[article.category] ?? 'from-slate-700 to-slate-900';
-  const chipClass = getCategoryChip(article.category);
+  // const chipClass = getCategoryChip(article.category);
 
   return (
     <Link
       to={`/article/${article.id}`}
       className={`
-        group block bg-surface rounded-xl overflow-hidden border border-border news-card
+        group block bg-white rounded-[20px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 border border-gray-100/80
         ${isList ? 'flex flex-row' : 'flex flex-col h-full'}
       `}
     >
@@ -106,8 +106,8 @@ const ArticleCardInner: React.FC<Props> = ({ article, viewMode }) => {
             </div>
           )}
 
-          {/* Category chip over image */}
-          <span className={`absolute top-2 left-2 z-10 text-[9px] font-black tracking-wider px-2 py-0.5 rounded-sm ${chipClass}`}>
+          {/* Category chip over image (Glassmorphism) */}
+          <span className={`absolute top-3 left-3 z-10 text-[10px] font-bold tracking-wider px-2.5 py-1 rounded-md bg-white/90 backdrop-blur-md text-gray-800 shadow-sm border border-white/40 uppercase`}>
             {article.category}
           </span>
         </div>
@@ -117,13 +117,14 @@ const ArticleCardInner: React.FC<Props> = ({ article, viewMode }) => {
       <div className={`p-4 flex flex-col flex-1 ${isList ? 'min-w-0' : ''}`}>
 
         {/* Source name */}
-        <p className="text-[9px] font-black tracking-widest text-text-muted uppercase mb-1.5">
+        <p className="text-[10px] font-bold tracking-widest text-[#50A0BA] uppercase mb-1.5 flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#50A0BA]/50"></span>
           {article.source_name || 'News Source'}
         </p>
 
         {/* Title */}
         <h2
-          className="text-[15px] font-bold text-text-main group-hover:text-primary transition-colors leading-snug mb-2 line-clamp-2"
+          className="text-[16px] font-extrabold text-gray-900 group-hover:text-[#50A0BA] transition-colors leading-[1.35] mb-2.5 line-clamp-2"
           style={{ fontFamily: 'var(--font-serif)' }}
         >
           {article.title}
@@ -138,19 +139,20 @@ const ArticleCardInner: React.FC<Props> = ({ article, viewMode }) => {
 
         {/* Summary */}
         {article.summary && article.summary.length > 0 && (
-          <p className="text-xs text-text-muted line-clamp-2 mb-3 leading-relaxed">
+          <p className="text-[13px] text-gray-500 line-clamp-2 mb-4 leading-relaxed">
             {stripHtml(article.summary.join(' '))}
           </p>
         )}
 
         {/* Footer */}
-        <div className="mt-auto pt-3 flex items-center justify-between border-t border-border-light">
-          <span className="text-[10px] font-medium text-text-muted">
+        <div className="mt-auto pt-4 flex items-center justify-between border-t border-gray-100">
+          <span className="text-[11px] font-semibold text-gray-400 flex items-center gap-1.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             {relativeTime(article.published_at)}
           </span>
-          <span className="text-[10px] font-bold text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
-            Read <ArrowRight size={12} />
-          </span>
+          <div className="w-7 h-7 rounded-full bg-gray-50 group-hover:bg-[#50A0BA] flex items-center justify-center transition-colors">
+             <ArrowRight size={14} className="text-gray-400 group-hover:text-white transition-colors" />
+          </div>
         </div>
       </div>
     </Link>
