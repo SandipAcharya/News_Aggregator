@@ -89,10 +89,6 @@ services:
       - rabbitmq
       - django-admin
 
-  ml-fastapi:
-    build: ./ml-fastapi
-    # ml-fastapi is purely internal, no exposed ports needed
-
   frontend:
     build: ./frontend
     environment:

@@ -19,3 +19,7 @@ Thumbs.db
 
 # Ignore the updated version subfolder
 News_Aggregator1/
+
+# Production secrets — NEVER commit
+News_Aggregator_Deployment/.env.prod
+News_Aggregator_Deployment/nginx/ssl/

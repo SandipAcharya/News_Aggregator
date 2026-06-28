@@ -1,112 +1,103 @@
-import type { Article } from '../services/api';
-import { ArrowRight, ImageOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import type { Article } from '../services/api';
 
-interface Props {
+interface CardProps {
     article: Article;
-    viewMode: 'grid' | 'list';
+    viewMode?: 'grid' | 'list';
 }
 
-// Strip any residual HTML tags from text (safety net for older DB records)
-const stripHtml = (text: string) => text?.replace(/<[^>]*>/g, '').trim() ?? '';
-
-// Category → gradient fallback when no real image is available
-const categoryGradient: Record<string, string> = {
-    Technology:    'from-blue-900 to-slate-800',
-    Politics:      'from-red-900 to-slate-800',
-    Sports:        'from-green-900 to-slate-800',
-    Business:      'from-yellow-900 to-slate-800',
-    Entertainment: 'from-purple-900 to-slate-800',
-    Science:       'from-teal-900 to-slate-800',
-    Health:        'from-pink-900 to-slate-800',
-    General:       'from-slate-700 to-slate-900',
+const formatTimeAgo = (dateStr: string) => {
+    const mins = Math.floor((Date.now() - new Date(dateStr).getTime()) / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
+    return `${Math.floor(mins / 1440)}d ago`;
 };
 
-export const ArticleCard: React.FC<Props> = ({ article, viewMode }) => {
-    const isList = viewMode === 'list';
-    const gradient = categoryGradient[article.category] ?? 'from-slate-700 to-slate-900';
-
-    // Calculate relative time
-    const getRelativeTime = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-        if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-        const diffInHours = Math.floor(diffInMinutes / 60);
-        if (diffInHours < 24) return `${diffInHours}h ago`;
-        return `${Math.floor(diffInHours / 24)}d ago`;
-    };
-
-    return (
-        <Link
-            to={`/article/${article.id}`}
-            className={`
-                block bg-surface rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group
-                ${isList ? 'flex flex-row min-h-[12rem]' : 'flex flex-col h-full'}
-            `}
-        >
-            {/* Image / Fallback */}
-            <div className={`relative overflow-hidden ${isList ? 'w-64 flex-shrink-0' : 'w-full h-48'}`}>
-                {article.image_url ? (
-                    <img
-                        src={article.image_url}
-                        alt={article.title}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                            // If the real image fails to load, swap in the gradient fallback
-                            const el = e.currentTarget;
-                            el.style.display = 'none';
-                            el.parentElement!.classList.add(`bg-gradient-to-br`, ...gradient.split(' '));
-                        }}
-                    />
-                ) : (
-                    <div className={`absolute inset-0 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-                        <ImageOff size={32} className="text-white/20" />
-                    </div>
-                )}
-                {/* Category pill overlay on image */}
-                <span className="absolute top-2 left-2 z-10 text-[9px] font-bold tracking-wider bg-black/60 text-white px-2 py-1 rounded uppercase backdrop-blur-sm">
-                    {article.category}
+// ── LARGE HERO (LEFT) ──
+export const HeroCard = ({ article }: CardProps) => (
+    <Link to={`/article/${article.id}`} className="group relative block w-full h-full min-h-[450px] md:min-h-[500px] rounded-2xl overflow-hidden card-hover">
+        <img
+            src={article.image_url || '/placeholder-news.jpg'}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=1200&q=80'; }}
+        />
+        <div className="absolute inset-0 hero-gradient" />
+        <div className="absolute inset-0 p-8 flex flex-col justify-end text-white">
+            <div className="mb-4">
+                <span className="px-2 py-1 bg-brand-red text-white text-[10px] font-bold rounded-sm uppercase tracking-wider shadow-sm">
+                    TOP STORY
                 </span>
             </div>
-
-            {/* Content */}
-            <div className={`p-5 flex flex-col flex-1 ${isList ? 'min-w-0' : ''}`}>
-
-                {/* Source Name */}
-                <div className="text-[10px] font-extrabold tracking-widest text-text-muted uppercase mb-2">
-                    {article.source_name || 'News Source'}
-                </div>
-
-                {/* Title */}
-                <h2 className="text-[17px] font-bold text-text-main group-hover:text-primary transition-colors leading-snug mb-3 line-clamp-2">
-                    {article.title}
-                </h2>
-
-                {/* Category + Leaning badge */}
-                <div className="mb-3">
-                    <span className="inline-block px-2.5 py-1 text-[9px] font-extrabold tracking-wider bg-surface-hover text-text-muted rounded uppercase">
-                        {article.category} · {article.political_leaning}
-                    </span>
-                </div>
-
-                {/* Summary — with HTML stripped as safety net */}
-                {article.summary && article.summary.length > 0 ? (
-                    <p className="text-sm text-text-muted line-clamp-2 mb-4 leading-relaxed">
-                        {stripHtml(article.summary.join(' '))}
-                    </p>
-                ) : null}
-
-                {/* Footer */}
-                <div className="mt-auto pt-4 flex items-center justify-between">
-                    <span className="text-xs font-medium text-text-muted">
-                        {getRelativeTime(article.published_at)}
-                    </span>
-                    <span className="text-xs font-bold text-primary flex items-center gap-1 group-hover:text-orange-500 transition-colors">
-                        View Summary <ArrowRight size={14} />
-                    </span>
-                </div>
+            <h2 className="text-3xl md:text-[40px] font-bold leading-tight mb-3 group-hover:text-gray-200 transition-colors">
+                {article.title}
+            </h2>
+            <p className="text-gray-200 text-sm md:text-base font-medium line-clamp-2 md:w-3/4 mb-4 leading-relaxed">
+                {article.summary ? (Array.isArray(article.summary) ? article.summary[0] : article.summary) : 'Read the full story to learn more about this developing situation.'}
+            </p>
+            <div className="text-xs font-medium text-gray-300">
+                By {article.source_name} &bull; {formatTimeAgo(article.published_at)}
             </div>
-        </Link>
-    );
-};
+        </div>
+    </Link>
+);
+
+// ── SMALL HERO (RIGHT STACK) ──
+export const HeroSmCard = ({ article }: CardProps) => (
+    <Link to={`/article/${article.id}`} className="group relative block w-full h-full min-h-[200px] md:min-h-[240px] rounded-2xl overflow-hidden card-hover">
+        <img
+            src={article.image_url || '/placeholder-news.jpg'}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=800&q=80'; }}
+        />
+        <div className="absolute inset-0 hero-sm-gradient" />
+        <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
+            <div className="mb-2">
+                <span className="px-2 py-1 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider rounded-sm">
+                    {article.category || 'NATIONAL'}
+                </span>
+            </div>
+            <h3 className="text-xl md:text-[22px] font-bold leading-snug mb-2 group-hover:text-gray-200 transition-colors">
+                {article.title}
+            </h3>
+            <div className="text-[11px] font-medium text-gray-300">
+                {formatTimeAgo(article.published_at)}
+            </div>
+        </div>
+    </Link>
+);
+
+// ── STANDARD GRID CARD (Latest News) ──
+export const ArticleCard = ({ article }: CardProps) => (
+    <Link to={`/article/${article.id}`} className="group flex flex-col bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300 h-full">
+        <div className="relative h-48 w-full overflow-hidden bg-gray-100 dark:bg-gray-700 shrink-0">
+            <img
+                src={article.image_url || '/placeholder-news.jpg'}
+                alt=""
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&q=80'; }}
+            />
+        </div>
+        
+        <div className="p-5 flex flex-col flex-1">
+            <span className="text-[10px] font-bold text-brand-red uppercase tracking-wider mb-2">
+                {article.category || 'NEWS'}
+            </span>
+            
+            <h3 className="text-[17px] font-bold text-gray-900 dark:text-gray-100 leading-snug mb-3 group-hover:text-brand-red dark:group-hover:text-brand-red transition-colors line-clamp-3">
+                {article.title}
+            </h3>
+            
+            <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium line-clamp-2 leading-relaxed mb-4 flex-1">
+                {article.summary 
+                    ? (Array.isArray(article.summary) ? article.summary[0] : article.summary) 
+                    : 'Read full story...'}
+            </p>
+            
+            <div className="pt-2 text-[11px] font-medium text-gray-400 mt-auto">
+                {formatTimeAgo(article.published_at)}
+            </div>
+        </div>
+    </Link>
+);

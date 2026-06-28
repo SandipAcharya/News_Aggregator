@@ -87,8 +87,8 @@ def scrape_rss_feeds():
         feed = feedparser.parse(source.rss_feed_url)
 
         for entry in feed.entries:
-            # Skip duplicates
-            if Article.objects.filter(url=entry.link).exists():
+            # Skip duplicates (Check by URL or identical Title)
+            if Article.objects.filter(url=entry.link).exists() or Article.objects.filter(title=entry.title).exists():
                 continue
 
             # Parse publish date
@@ -114,14 +114,36 @@ def scrape_rss_feeds():
                 "summary": None
             }
 
-            # Request enrichment from the ML FastAPI microservice
-            try:
-                ml_url = "http://ml-fastapi:8000/api/ml/analyze"
-                response = requests.post(ml_url, json={"text": raw_content}, timeout=10)
-                if response.status_code == 200:
-                    ml_data = response.json()
-            except requests.RequestException as e:
-                print(f"ML Service unavailable for article {entry.link}: {e}")
+            # Request enrichment from Groq API directly (Replaces ml-fastapi)
+            groq_api_key = os.environ.get("GROQ_API_KEY")
+            if groq_api_key:
+                try:
+                    client = Groq(api_key=groq_api_key)
+                    prompt = f"""
+You are a news classifier. Analyze this article and return ONLY valid JSON.
+Source: {source.name}
+Title: {entry.title}
+Content: {raw_content[:2000]}
+
+Respond EXACTLY with this JSON structure:
+{{
+  "category": "Technology" | "Business" | "Politics" | "Science" | "Sports" | "Health" | "Entertainment" | "World" | "General",
+  "language": "en" | "ne" | "hi",
+  "political_leaning": "Left" | "Center-Left" | "Center" | "Center-Right" | "Right" | "Far Right",
+  "summary": ["A short 1-2 sentence summary of the article."]
+}}
+"""
+                    response = client.chat.completions.create(
+                        messages=[{"role": "user", "content": prompt}],
+                        model="llama-3.1-8b-instant",
+                        temperature=0.1,
+                        response_format={"type": "json_object"}
+                    )
+                    ml_data = json.loads(response.choices[0].message.content)
+                except Exception as e:
+                    print(f"Groq API Error for {entry.link}: {e}")
+            else:
+                print("GROQ_API_KEY not found in environment, skipping enrichment.")
 
             # Save the clean, enriched article to the database
             Article.objects.create(

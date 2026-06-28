@@ -39,8 +39,8 @@ class Article(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     source = models.ForeignKey(NewsSource, on_delete=models.CASCADE, related_name='articles')
     title = models.CharField(max_length=500)
-    url = models.URLField(max_length=2000, unique=True, db_index=True)
-    image_url = models.URLField(max_length=2000, null=True, blank=True, help_text="Thumbnail image extracted from RSS feed")
+    url = models.TextField(unique=True, db_index=True)
+    image_url = models.TextField(null=True, blank=True, help_text="Thumbnail image extracted from RSS feed")
     raw_content = models.TextField(help_text="Clean text scraped from the source (HTML stripped)")
     
     # ML Enriched Metadata

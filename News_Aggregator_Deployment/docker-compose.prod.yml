@@ -1,0 +1,94 @@
+version: '3.8'
+
+# ============================================================
+# PRODUCTION — Backend Only
+# Frontend is hosted separately on Vercel
+# ============================================================
+
+services:
+  # ── Infrastructure ──────────────────────────────────────────
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    restart: always
+
+  # ── Reverse Proxy ─────────────────────────────────────────
+  nginx-gateway:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro          # SSL certs (from Certbot)
+      - certbot_www:/var/www/certbot:ro
+    depends_on:
+      - node-api
+      - django-admin
+    restart: always
+
+  # ── Node.js API Gateway ────────────────────────────────────
+  node-api:
+    build: ../backend-node
+    env_file:
+      - .env.prod
+    environment:
+      - NODE_ENV=production
+    restart: always
+
+  # ── Django Admin + Internal API ────────────────────────────
+  django-admin:
+    build: ../backend-django
+    env_file:
+      - .env.prod
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    volumes:
+      - django_static:/app/staticfiles
+    restart: always
+
+  # ── React Frontend ─────────────────────────────────────────
+  frontend:
+    build: ../frontend
+    environment:
+      - VITE_API_BASE_URL=/api
+    restart: always
+
+  # ── Celery Worker (RSS scraping + AI summaries) ───────────
+  celery-worker:
+    build: ../backend-django
+    command: celery -A core worker -l INFO --concurrency=4
+    env_file:
+      - .env.prod
+    restart: always
+
+  # ── Celery Beat (Scheduler — every 30 min) ─────────────────
+  celery-beat:
+    build: ../backend-django
+    command: celery -A core beat -l INFO
+    env_file:
+      - .env.prod
+    restart: always
+
+volumes:
+  django_static:
+  certbot_www:
+  postgres_data:
+  redis_data:

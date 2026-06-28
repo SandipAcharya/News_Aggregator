@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { apiClient } from '../services/api';
 import {
   ArrowLeft, Image, Tag, Globe, BarChart2, FileText,
   Send, Save, Eye, AlertCircle, CheckCircle2, Loader2, X, Plus, Upload, Link2
@@ -24,6 +25,7 @@ interface FormData {
   language: string;
   political_leaning: string;
   source_name: string;
+  original_url: string;
   tags: string[];
   status: 'draft' | 'auto_scraped';
 }
@@ -64,6 +66,7 @@ export const ArticleComposer = () => {
     language: 'en',
     political_leaning: 'Center',
     source_name: '',
+    original_url: '',
     tags: [],
     status: 'draft',
   });
@@ -90,21 +93,14 @@ export const ArticleComposer = () => {
     setErrorMsg('');
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/articles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...form, status: submitStatus }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to submit');
+      await apiClient.post('/articles', { ...form, status: submitStatus });
       setSuccessMsg(submitStatus === 'auto_scraped'
         ? '🎉 Article published to the feed!'
         : '💾 Draft saved successfully!');
       setTimeout(() => navigate('/'), 2500);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Submission failed. Please try again.');
+      const msg = err.response?.data?.error || err.message || 'Submission failed. Please try again.';
+      setErrorMsg(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -386,6 +382,19 @@ export const ArticleComposer = () => {
               className="w-full px-3 py-2 bg-background border border-border rounded-xl text-text-main text-sm placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
             />
             <p className="text-xs text-text-muted mt-1.5">Leave blank to use your account name.</p>
+          </div>
+
+          {/* Original Article URL */}
+          <div className="bg-surface border border-border rounded-2xl p-5">
+            <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3 flex items-center gap-1.5"><Globe size={13} /> Original Article URL</h3>
+            <input
+              type="url"
+              value={form.original_url}
+              onChange={e => set('original_url', e.target.value)}
+              placeholder="https://original-source.com/article"
+              className="w-full px-3 py-2 bg-background border border-border rounded-xl text-text-main text-sm placeholder-text-muted focus:outline-none focus:border-primary transition-colors"
+            />
+            <p className="text-xs text-text-muted mt-1.5">Optional. Link to the original article source.</p>
           </div>
 
           {/* Tags */}

@@ -186,7 +186,7 @@ export const createArticle = async (data: any) => {
 
     // 2. Insert Article
     const articleId = crypto.randomUUID();
-    const articleUrl = `https://bicharbimarsh.com/article/${articleId}`;
+    const articleUrl = data.original_url || `https://bicharbimarsh.com/article/${articleId}`;
     
     const insertQuery = `
         INSERT INTO news_article (

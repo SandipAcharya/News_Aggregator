@@ -1,113 +1,152 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchArticles } from '../services/api';
 import { useStore } from '../store/useStore';
-import { ArticleCard } from './ArticleCard';
+import { ArticleCard, HeroCard, HeroSmCard } from './ArticleCard';
 import { SkeletonCard } from './SkeletonCard';
+import { Link } from 'react-router-dom';
 
 export const ArticleFeed = () => {
     const {
         selectedCategory, selectedLeaning,
         selectedLanguage, selectedCountry,
-        selectedSourceType,
-        viewMode, searchQuery,
+        selectedSourceType, searchQuery,
         startDate, endDate,
     } = useStore();
 
-    // All filters are sent server-side — cache key covers all dimensions
+    const isFiltered = !!(selectedLeaning || selectedLanguage ||
+        selectedCountry || selectedSourceType || searchQuery || startDate || endDate);
+
     const { data: articles, isLoading, isError, error } = useQuery({
-        queryKey: [
-            'articles',
-            selectedCategory,
-            selectedLeaning,
-            selectedLanguage,
-            selectedCountry,
-            selectedSourceType,
-            searchQuery,
-            startDate,
-            endDate,
-        ],
+        queryKey: ['articles', selectedCategory, selectedLeaning, selectedLanguage,
+            selectedCountry, selectedSourceType, searchQuery, startDate, endDate],
         queryFn: () => fetchArticles({
-            category:   selectedCategory,
-            leaning:    selectedLeaning,
-            language:   selectedLanguage,
-            country:    selectedCountry,
-            sourceType: selectedSourceType,
-            search:     searchQuery || null,
-            startDate:  startDate,
-            endDate:    endDate,
+            category: selectedCategory, leaning: selectedLeaning,
+            language: selectedLanguage, country: selectedCountry,
+            sourceType: selectedSourceType, search: searchQuery || null,
+            startDate, endDate,
         }),
         staleTime: 60000,
     });
 
     if (isError) {
         return (
-            <div className="p-10 text-center bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl border border-red-200 dark:border-red-800">
-                <div className="text-4xl mb-3">⚠️</div>
-                <h3 className="font-bold text-lg">Failed to load articles</h3>
-                <p className="text-sm mt-2 font-mono bg-red-100 dark:bg-red-900/30 p-3 rounded">
-                    {error instanceof Error ? error.message : 'Unknown Network Error'}
-                </p>
-                <p className="text-sm mt-3 text-red-500">
-                    Make sure the backend is running: <code className="font-mono font-bold">npm run dev</code> in <code className="font-mono">backend-node/</code>
+            <div className="py-20 text-center flex flex-col items-center">
+                <div className="text-4xl mb-4">⚠️</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Service Unavailable</h3>
+                <p className="text-sm font-medium text-gray-500 max-w-md">
+                    {error instanceof Error ? error.message : 'Please check your connection or try again later.'}
                 </p>
             </div>
         );
     }
 
-    const gridClass = viewMode === 'grid'
-        ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-        : 'flex flex-col gap-4';
-
-    const activeFilterCount = [
-        selectedCategory, selectedLeaning, selectedLanguage,
-        selectedCountry, selectedSourceType, startDate, endDate,
-        searchQuery || null,
-    ].filter(Boolean).length;
-
-    return (
-        <div>
-            {/* Results summary bar */}
-            {!isLoading && articles && (
-                <div className="flex items-center justify-between mb-4">
-                    <p className="text-xs text-text-muted">
-                        Showing <span className="font-bold text-text-main">{articles.length}</span> articles
-                        {searchQuery && (
-                            <span> matching "<span className="text-primary font-medium">{searchQuery}</span>"</span>
-                        )}
-                        {selectedCategory && (
-                            <span> · <span className="text-primary font-medium">{selectedCategory}</span></span>
-                        )}
-                        {selectedLeaning && (
-                            <span> · <span className="text-primary font-medium">{selectedLeaning}</span></span>
-                        )}
-                        {startDate && endDate && (
-                            <span> · <span className="text-primary font-medium">{startDate}</span> → <span className="text-primary font-medium">{endDate}</span></span>
-                        )}
-                    </p>
-                    {activeFilterCount > 0 && (
-                        <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 px-2 py-1 rounded-full font-bold">
-                            {activeFilterCount} filter{activeFilterCount > 1 ? 's' : ''} active
-                        </span>
-                    )}
-                </div>
-            )}
-
-            <div className={gridClass}>
-                {isLoading ? (
-                    [...Array(6)].map((_, i) => <SkeletonCard key={i} />)
-                ) : (
-                    articles?.map((article) => (
-                        <ArticleCard key={article.id} article={article} viewMode={viewMode} />
-                    ))
-                )}
-
-                {articles?.length === 0 && !isLoading && (
-                    <div className="col-span-full py-20 text-center text-text-muted">
-                        <div className="text-5xl mb-4">🔍</div>
-                        <p className="font-semibold text-text-main text-lg">No articles found</p>
-                        <p className="text-sm mt-2">Try adjusting your filters or search query.</p>
+    if (isFiltered) {
+        return (
+            <div className="max-w-[1400px] mx-auto px-4 lg:px-8 pt-8 min-h-screen">
+                {!isLoading && articles && (
+                    <div className="mb-6 flex items-center justify-between">
+                        <p className="text-[13px] font-medium text-gray-500 dark:text-gray-400">
+                            {articles.length} articles found {searchQuery ? `for "${searchQuery}"` : ''}
+                        </p>
                     </div>
                 )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {isLoading
+                        ? [...Array(8)].map((_, i) => <SkeletonCard key={i} />)
+                        : articles?.map(a => <ArticleCard key={a.id} article={a} viewMode="grid" />)
+                    }
+                </div>
+            </div>
+        );
+    }
+
+    const hero      = articles?.[0];
+    const heroRight = articles?.slice(1, 3) ?? [];
+    const latest    = articles?.slice(3, 7) ?? [];
+    const trending  = articles?.slice(7, 11) ?? [];
+
+    return (
+        <div className="flex flex-col gap-12 pt-8 pb-12">
+            
+            <div className="max-w-[1400px] mx-auto px-4 lg:px-8 w-full">
+                {/* ── HERO ── */}
+                <section>
+                    <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+                        <div className="min-h-[400px] lg:min-h-[500px]">
+                            {isLoading
+                                ? <div className="animate-pulse bg-gray-100 rounded-2xl h-full min-h-[500px]" />
+                                : hero && <HeroCard article={hero} />
+                            }
+                        </div>
+                        <div className="flex flex-col gap-6">
+                            {isLoading
+                                ? [0, 1].map(i => <div key={i} className="animate-pulse bg-gray-100 rounded-2xl flex-1 min-h-[240px]" />)
+                                : heroRight.map(a => <HeroSmCard key={a.id} article={a} />)
+                            }
+                        </div>
+                    </div>
+                </section>
+
+                {/* ── LATEST NEWS ── */}
+                <section className="mt-12">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-bold dark:text-white">Latest News</h2>
+                        <button onClick={() => useStore.getState().clearAllFilters()} className="text-xs font-bold hover:text-brand-red flex items-center gap-1 transition-colors dark:text-gray-300">
+                            View All News &rarr;
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {isLoading
+                            ? [...Array(4)].map((_, i) => <SkeletonCard key={i} />)
+                            : latest.map(a => <ArticleCard key={a.id} article={a} viewMode="grid" />)
+                        }
+                    </div>
+                </section>
+            </div>
+
+            {/* ── TRENDING NOW ── */}
+            <div className="max-w-[1400px] mx-auto px-4 lg:px-8 w-full">
+                <section>
+                    <div className="flex items-center justify-between mb-8 border-b border-gray-200 dark:border-gray-800 pb-4">
+                        <h2 className="text-xl font-bold dark:text-white">Trending Now</h2>
+                        <button onClick={() => useStore.getState().clearAllFilters()} className="text-xs font-bold hover:text-brand-red flex items-center gap-1 transition-colors dark:text-gray-300">
+                            View All &rarr;
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-6">
+                        {isLoading
+                            ? [...Array(4)].map((_, i) => (
+                                <div key={i} className="flex gap-4 animate-pulse">
+                                    <div className="w-8 h-8 rounded bg-gray-100 shrink-0"/>
+                                    <div className="flex-1">
+                                        <div className="h-4 bg-gray-100 rounded w-full mb-2" />
+                                        <div className="h-4 bg-gray-100 rounded w-2/3" />
+                                    </div>
+                                </div>
+                            ))
+                            : trending.map((a, i) => {
+                                const minsAgo = Math.floor((Date.now() - new Date(a.published_at).getTime()) / 60000);
+                                const timeStr = minsAgo < 60 ? `${minsAgo}m ago` : `${Math.floor(minsAgo / 60)}h ago`;
+                                return (
+                                    <Link key={a.id} to={`/article/${a.id}`} className="group flex items-start gap-4 hover:opacity-80 transition-opacity">
+                                        <span className="text-[28px] text-brand-red font-normal shrink-0 leading-none">
+                                            {String(i + 1).padStart(2, '0')}
+                                        </span>
+                                        <div className="pt-1">
+                                            <h3 className="text-[15px] font-bold text-gray-900 dark:text-gray-100 leading-snug mb-1.5 line-clamp-2">
+                                                {a.title}
+                                            </h3>
+                                            <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500">
+                                                {timeStr}
+                                            </div>
+                                        </div>
+                                    </Link>
+                                );
+                            })
+                        }
+                    </div>
+                </section>
             </div>
         </div>
     );

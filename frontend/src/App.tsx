@@ -1,248 +1,228 @@
 import { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Routes, Route } from 'react-router-dom';
-import { Filters } from './components/Filters';
+import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import { ArticleFeed } from './components/ArticleFeed';
 import { ArticleSummary } from './pages/ArticleSummary';
 import { ArticleComposer } from './pages/ArticleComposer';
-import { ForgotPassword } from './pages/ForgotPassword';
 import { Login } from './pages/Login';
+import { ForgotPassword } from './pages/ForgotPassword';
 import { useStore } from './store/useStore';
-import { Sun, Moon, Search, LayoutGrid, List, Menu, X, LogOut, LogIn, PenSquare } from 'lucide-react';
-
-
-
-function App() {
-  const {
-    isDarkMode, toggleDarkMode,
-    viewMode, setViewMode,
-    setSearchQuery,
-    token, logout,
-  } = useStore();
-
-  const [inputValue, setInputValue] = useState('');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [time, setTime] = useState(new Date());
-
-useEffect(() => {
-  const timer = setInterval(() => setTime(new Date()), 1000);
-  return () => clearInterval(timer);
-}, []);
-
-const englishTime = time.toLocaleTimeString('en-US', {
-  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
-});
-
-const englishDate = time.toLocaleDateString('en-US', {
-  year: 'numeric', month: 'short', day: 'numeric',
-});
-
+import { Search, ChevronDown, Menu, X, Sun, Moon, LogOut, PenSquare } from 'lucide-react';
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: { refetchOnWindowFocus: false, retry: 1 },
-  },
+    defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 1 } },
 });
 
-  const requireAuth = (action: () => void) => {
-    if (!token) {
-      window.location.href = '/login';
-      return;
-    }
-    action();
-  };
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const { token } = useStore();
+    return token ? <>{children}</> : <Navigate to="/login" replace />;
+};
 
-  const handleSearch = () => requireAuth(() => setSearchQuery(inputValue));
+const NAV_CATEGORIES = [
+    { label: 'Home', value: null },
+    { label: 'Politics', value: 'Politics' },
+    { label: 'Economy', value: 'Business' },
+    { label: 'Society', value: 'General' },
+    { label: 'Technology', value: 'Technology' },
+    { label: 'World', value: 'World' },
+    { label: 'Sports', value: 'Sports' },
+];
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch();
-  };
+function App() {
+    const { selectedCategory, setSelectedCategory, isDarkMode, toggleDarkMode, setSearchQuery, token, logout } = useStore();
+    const [time, setTime] = useState(new Date());
+    const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchInput, setSearchInput] = useState('');
 
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+    useEffect(() => {
+        const t = setInterval(() => setTime(new Date()), 60000);
+        return () => clearInterval(t);
+    }, []);
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-background text-text-main flex flex-col font-sans">
+    const dateStr = time.toLocaleDateString('en-US', {
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+    });
 
-        {/* ── Top Header ─────────────────────────────────────────── */}
-        <header className="sticky top-0 z-50 h-16 border-b border-border bg-surface flex items-center justify-between px-6 shrink-0 gap-4">
+    useEffect(() => {
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [isDarkMode]);
 
-          {/* Left: Hamburger + Brand */}
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="p-2 -ml-2 rounded-lg hover:bg-background text-text-muted transition-colors"
-              aria-label="Open Filters"
-            >
-              <Menu size={22} />
-            </button>
-            <div className="flex items-center gap-3">
-              <img
-                src="/logo.jpeg"
-                alt="Bichar Bimarsh Media Logo"
-                className="h-10 w-10 rounded-full object-cover shrink-0"
-              />
-              <div className="flex flex-col justify-center">
-                <h1 className="text-xl sm:text-2xl font-bold text-text-main tracking-tight leading-tight">
-                  Bichar Bimarsh Media
-                </h1>
-                <div className="flex items-center gap-3 text-xs font-mono leading-tight">
-                  <span className="text-text-muted">{englishDate} &nbsp;{englishTime}</span>
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        setSearchQuery(searchInput.trim());
+    };
+
+    return (
+        <QueryClientProvider client={queryClient}>
+            <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'}`}>
+                
+                {/* ══ TOP UTILITY BAR ══ */}
+                <div className={`${isDarkMode ? 'bg-gray-950 border-gray-800 text-gray-400' : 'bg-gray-50 border-gray-200 text-gray-600'} border-b text-[11px] font-semibold hidden md:block`}>
+                    <div className="max-w-[1400px] mx-auto px-4 lg:px-8 h-9 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <span>{dateStr}</span>
+                            <span className="w-px h-3 bg-gray-300"/>
+                            <span>Kathmandu, Nepal 24° ⛅</span>
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <a href="#" className="hover:text-black transition-colors">About Us</a>
+                            <a href="#" className="hover:text-black transition-colors">Contact</a>
+                            <a href="#" className="hover:text-black transition-colors">Advertise</a>
+                            <div className="flex items-center gap-3 ml-2 border-l border-gray-300 pl-4">
+                                <a href="#" className="font-bold hover:text-black">f</a>
+                                <a href="#" className="font-bold hover:text-black">𝕏</a>
+                                <a href="#" className="font-bold hover:text-black">▶</a>
+                            </div>
+                            <button onClick={toggleDarkMode} className="ml-2 hover:text-black dark:text-gray-400 dark:hover:text-white">
+                                {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
+                            </button>
+                            
+                            {/* Action Buttons */}
+                            {token ? (
+                                <div className="flex items-center gap-2 ml-2 border-l border-gray-300 dark:border-gray-700 pl-4">
+                                    <Link to="/compose" className="hover:text-brand-red flex items-center gap-1 dark:text-gray-400 dark:hover:text-white"><PenSquare size={14}/></Link>
+                                    <button onClick={logout} className="hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 flex items-center gap-1"><LogOut size={14}/></button>
+                                </div>
+                            ) : (
+                                <Link to="/login" className="ml-2 hover:text-brand-red dark:text-gray-400 dark:hover:text-white font-bold">Login</Link>
+                            )}
+
+                            <form onSubmit={handleSearch} className="flex items-center gap-1 border border-gray-300 rounded-full px-2 py-0.5 bg-white dark:bg-gray-800 dark:border-gray-700 ml-2">
+                                <input 
+                                    type="text"  
+                                    placeholder="Search..." 
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    className="w-24 text-[10px] bg-transparent outline-none dark:text-white"
+                                />
+                                <button type="submit" className="hover:text-black dark:text-gray-400 dark:hover:text-white">
+                                    <Search size={12}/>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>  
-          </div>
-          {/* Centre: Search Bar */}
-          <div className="relative flex-1 max-w-xl hidden md:block">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Search size={16} className="text-text-muted" />
-            </div>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onClick={() => { if (!token) window.location.href = '/login'; }}
-              placeholder={token ? 'Search articles…' : 'Sign in to search…'}
-              readOnly={!token}
-              className={`w-full h-10 pl-10 pr-24 rounded-lg border border-border bg-background text-text-main placeholder-text-muted focus:outline-none focus:border-primary transition-colors text-sm ${!token ? 'cursor-pointer opacity-70' : ''}`}
-            />
-            <button
-              onClick={handleSearch}
-              className="absolute right-1 top-1 bottom-1 px-4 bg-primary hover:bg-orange-600 text-white text-sm font-semibold rounded-md transition-colors"
-            >
-              Search
-            </button>
-          </div>
 
-          {/* Right: Controls */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* View Toggles */}
-            <div className="hidden sm:flex items-center gap-1 p-1 bg-background border border-border rounded-lg">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`w-8 h-8 rounded-md flex items-center justify-center transition-colors ${viewMode === 'grid' ? 'bg-primary text-white' : 'text-text-muted hover:text-text-main'}`}
-                aria-label="Grid view"
-              >
-                <LayoutGrid size={16} />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`w-8 h-8 rounded-md flex items-center justify-center transition-colors ${viewMode === 'list' ? 'bg-primary text-white' : 'text-text-muted hover:text-text-main'}`}
-                aria-label="List view"
-              >
-                <List size={16} />
-              </button>
-            </div>
+                {/* ══ MASTHEAD & NAVIGATION ══ */}
+                <header className={`border-b ${isDarkMode ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-white'} sticky top-0 z-50`}>
+                    <div className="max-w-[1400px] mx-auto px-4 lg:px-8 h-20 flex items-center justify-between gap-8">
+                        
+                        {/* Logo */}
+                        <Link to="/" onClick={() => setSelectedCategory(null)} className="flex items-center gap-4 shrink-0">
+                            <img src="/logo.jpeg" alt="Logo" className="h-14 md:h-16 w-auto object-contain border border-gray-200 dark:border-gray-700 rounded p-1 bg-white" />
+                            <div className="flex flex-col justify-center pt-1 hidden sm:flex">
+                                <span className="font-extrabold text-[22px] tracking-tight leading-none dark:text-white text-gray-900">
+                                    BICHAR BIMARSH
+                                </span>
+                                <span className="text-[12px] font-bold tracking-[0.3em] text-brand-red mt-1">
+                                    MEDIA
+                                </span>
+                            </div>
+                        </Link>
 
-            <div className="w-px h-6 bg-border mx-1 hidden sm:block" />
+                        {/* Navigation Links */}
+                        <nav className="hidden md:flex items-center h-full gap-8">
+                            {NAV_CATEGORIES.map((cat) => {
+                                const isActive = cat.value === null ? selectedCategory === null : selectedCategory === cat.value;
+                                return (
+                                    <button 
+                                        key={cat.label}
+                                        onClick={() => setSelectedCategory(cat.value)}
+                                        className={`relative h-full flex items-center text-sm font-bold transition-colors
+                                            ${isActive ? 'text-brand-red' : (isDarkMode ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-black')}
+                                        `}
+                                    >
+                                        {cat.label}
+                                        {isActive && (
+                                            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-[3px] bg-brand-red"/>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                            <button className="flex items-center gap-1 text-sm font-bold text-gray-700 hover:text-black">
+                                More <ChevronDown size={14}/>
+                            </button>
+                        </nav>
 
-            {/* Dark Mode */}
-            <button
-              onClick={toggleDarkMode}
-              className="w-9 h-9 rounded-lg bg-background flex items-center justify-center text-text-muted hover:text-text-main border border-border transition-colors"
-              aria-label="Toggle dark mode"
-            >
-              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+                        {/* Mobile Menu Toggle */}
+                        <button className="md:hidden" onClick={() => setMobileMenuOpen(true)}>
+                            <Menu size={24}/>
+                        </button>
+                    </div>
+                </header>
 
-            {/* Auth Button */}
-            {token && (
-              <a
-                href="/compose"
-                title="Compose Article"
-                className="w-9 h-9 rounded-lg bg-background flex items-center justify-center text-text-muted hover:text-text-main border border-border transition-colors"
-              >
-                <PenSquare size={18} />
-              </a>
-            )}
-
-            {token ? (
-              <button
-                onClick={logout}
-                title="Log out"
-                className="w-9 h-9 rounded-lg bg-background flex items-center justify-center text-text-muted hover:text-red-500 border border-border transition-colors"
-              >
-                <LogOut size={18} />
-              </button>
-            ) : (
-              <a
-                href="/login"
-                title="Sign In"
-                className="flex items-center gap-1.5 px-3 h-9 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-orange-600 transition-colors"
-              >
-                <LogIn size={15} />
-                <span className="hidden sm:block">Sign In</span>
-              </a>
-            )}
-          </div>
-        </header>
-
-        {/* ── Main Layout ─────────────────────────────────────────── */}
-        <div className="flex flex-1 overflow-hidden relative">
-
-          {/* Backdrop */}
-          {isSidebarOpen && (
-            <div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity"
-              onClick={() => setIsSidebarOpen(false)}
-            />
-          )}
-
-          {/* Sliding Drawer Sidebar */}
-          <aside
-            className={`fixed inset-y-0 left-0 z-50 w-80 bg-surface shadow-2xl flex flex-col transform transition-transform duration-300 ease-in-out ${
-              isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-            }`}
-          >
-            {/* Drawer Header */}
-            <div className="h-16 flex items-center justify-between px-5 border-b border-border shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary" />
-                <h2 className="text-base font-bold text-text-main">Filters</h2>
-                {!token && (
-                  <span className="text-[10px] font-bold text-orange-500 border border-orange-500/30 rounded-full px-2 py-0.5 bg-orange-500/10">
-                    LOGIN REQUIRED
-                  </span>
+                {/* Mobile Menu Overlay */}
+                {isMobileMenuOpen && (
+                    <div className="fixed inset-0 z-50 bg-white p-4 flex flex-col md:hidden">
+                        <div className="flex justify-end mb-4">
+                            <button onClick={() => setMobileMenuOpen(false)}><X size={28}/></button>
+                        </div>
+                        <div className="flex flex-col gap-4 text-xl font-bold">
+                            {NAV_CATEGORIES.map(cat => (
+                                <button key={cat.label} onClick={() => { setSelectedCategory(cat.value); setMobileMenuOpen(false); }} className="text-left py-2 border-b">
+                                    {cat.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 )}
-              </div>
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className="p-2 rounded-lg hover:bg-background text-text-muted transition-colors"
-                aria-label="Close filters"
-              >
-                <X size={18} />
-              </button>
-            </div>
 
-            {/* Drawer Content */}
-            <div className="flex-1 overflow-hidden">
-              <Filters onClose={() => setIsSidebarOpen(false)} />
-            </div>
-          </aside>
+                {/* ══ MAIN CONTENT ══ */}
+                <main className="flex-1 w-full pb-16">
+                    <Routes>
+                        <Route path="/" element={<ArticleFeed />} />
+                        <Route path="/article/:id" element={<ArticleSummary />} />
+                        <Route path="/compose" element={<ProtectedRoute><ArticleComposer /></ProtectedRoute>} />
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                    </Routes>
+                </main>
 
-          {/* Main Feed */}
-          <main className="flex-1 overflow-y-auto bg-background">
-            <div className="px-4 sm:px-6 py-6 h-full">
-              <Routes>
-                <Route path="/" element={<ArticleFeed />} />
-                <Route path="/article/:id" element={<ArticleSummary />} />
-                <Route path="/compose" element={<ArticleComposer />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-              </Routes>
+                {/* ══ FOOTER ══ */}
+                <footer className="bg-[#121212] text-white mt-auto">
+                    <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-12 flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div>
+                            <h2 className="text-xl md:text-2xl font-bold leading-snug">
+                                For truth, facts, and impartial news,<br/>
+                                stay connected with Bichar Bimarsh Media.
+                            </h2>
+                        </div>
+                        <div className="flex flex-col gap-3 w-full md:w-auto">
+                            <div className="flex w-full md:w-96">
+                                <input 
+                                    type="email" 
+                                    placeholder="Your email address" 
+                                    className="flex-1 h-11 px-4 bg-white text-black text-sm focus:outline-none"
+                                />
+                                <button className="h-11 px-6 bg-brand-red text-white text-sm font-bold hover:bg-brand-red-hover transition-colors">
+                                    Subscribe
+                                </button>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <input type="checkbox" className="rounded-sm bg-transparent border-gray-500" />
+                                <span>I agree to the <a href="#" className="underline">Privacy Policy</a> and <a href="#" className="underline">Terms of Use</a>.</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="border-t border-gray-800 bg-[#0a0a0a]">
+                        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 h-14 flex items-center justify-between text-[11px] text-gray-400 font-medium">
+                            <p>© 2025 Bichar Bimarsh Media. All rights reserved.</p>
+                            <div className="flex gap-6">
+                                <a href="#" className="hover:text-white">Privacy Policy</a>
+                                <a href="#" className="hover:text-white">Terms of Use</a>
+                                <a href="#" className="hover:text-white">Sitemap</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
             </div>
-          </main>
-        </div>
-      </div>
-    </QueryClientProvider>
-  );
+        </QueryClientProvider>
+    );
 }
 
 export default App;

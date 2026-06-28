@@ -71,9 +71,9 @@ The system is composed of **9 Docker services** communicating over an internal n
                     └────────┬────────┘                  │  │
                              │                           │  │
                     ┌────────▼────────┐        ┌─────────▼──▼──────┐
-                    │   RABBITMQ      │        │   ML FASTAPI      │
-                    │ (amqp :5672)    │        │  Enrichment API   │
-                    │ Message Broker  │        │  Category/Leaning │
+                    │   RABBITMQ      │        │   GROQ API        │
+                    │ (amqp :5672)    │        │  LLaMA 3.1 AI     │
+                    │ Message Broker  │        │  Category/Summary │
                     └─────────────────┘        └───────────────────┘
                              │
                     ┌────────▼────────┐
@@ -98,7 +98,7 @@ The system is composed of **9 Docker services** communicating over an internal n
 | **Cache** | Redis 7 | Smart query result caching |
 | **Scraping** | Django + feedparser | RSS ingestion engine |
 | **Task Queue** | Celery + RabbitMQ | Async background processing |
-| **ML Enrichment** | FastAPI + Python | Category & bias classification |
+| **ML Enrichment** | Groq API (LLaMA) | Intelligent AI Categorization |
 | **Reverse Proxy** | Nginx Alpine | Gateway, SSL termination |
 | **Containerization** | Docker Compose | Full local orchestration |
 
@@ -146,9 +146,7 @@ News_Aggregator/
 │   │   └── settings.py         # Celery Beat schedule (30 min)
 │   └── Dockerfile
 │
-├── ml-fastapi/                 # ML enrichment microservice
-│   └── ...                     # Category & leaning classifier
-│
+
 └── ARCHITECTURE.md             # Detailed technical documentation
 ```
 
@@ -172,7 +170,6 @@ docker-compose up -d --build
 ✔ Container news_aggregator-node-api-1       Started
 ✔ Container news_aggregator-celery-worker-1  Started
 ✔ Container news_aggregator-celery-beat-1    Started
-✔ Container news_aggregator-ml-fastapi-1     Started
 ✔ Container news_aggregator-frontend-1       Started
 ✔ Container news_aggregator-nginx-gateway-1  Started
 ```
@@ -283,8 +280,8 @@ Every 30 minutes:
                     saves new articles → [PostgreSQL]
                     (duplicate URLs are auto-skipped)
                                     │
-4.                         [ML FastAPI]  (optional enrichment)
-                            assigns category + political leaning
+4.                         [Groq API]  (AI enrichment via LLaMA)
+                            assigns category + summary + leaning
                                     │
 5. [User opens browser] ──GET /api/news──► [Nginx] ──► [Node.js]
                                                             │
