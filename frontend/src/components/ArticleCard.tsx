@@ -117,14 +117,14 @@ const ArticleCardInner: React.FC<Props> = ({ article, viewMode }) => {
       <div className={`p-4 flex flex-col flex-1 ${isList ? 'min-w-0' : ''}`}>
 
         {/* Source name */}
-        <p className="text-[10px] font-bold tracking-widest text-[#50A0BA] uppercase mb-1.5 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#50A0BA]/50"></span>
+        <p className="text-[10px] font-bold tracking-widest text-primary uppercase mb-1.5 flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary/50"></span>
           {article.source_name || 'News Source'}
         </p>
 
         {/* Title */}
         <h2
-          className="text-[16px] font-extrabold text-gray-900 group-hover:text-[#50A0BA] transition-colors leading-[1.35] mb-2.5 line-clamp-2"
+          className="text-[16px] font-extrabold text-text-main group-hover:text-primary transition-colors leading-[1.35] mb-2.5 line-clamp-2"
           style={{ fontFamily: 'var(--font-serif)' }}
         >
           {article.title}
@@ -150,7 +150,7 @@ const ArticleCardInner: React.FC<Props> = ({ article, viewMode }) => {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             {relativeTime(article.published_at)}
           </span>
-          <div className="w-7 h-7 rounded-full bg-gray-50 group-hover:bg-[#50A0BA] flex items-center justify-center transition-colors">
+          <div className="w-7 h-7 rounded-full bg-surface-hover group-hover:bg-primary flex items-center justify-center transition-colors">
              <ArrowRight size={14} className="text-gray-400 group-hover:text-white transition-colors" />
           </div>
         </div>

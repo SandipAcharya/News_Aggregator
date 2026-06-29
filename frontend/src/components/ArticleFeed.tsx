@@ -31,7 +31,7 @@ import { useStore } from '../store/useStore';
 import { ArticleCard } from './ArticleCard';
 import { SkeletonCard } from './SkeletonCard';
 import type { Article } from '../services/api';
-import { TrendingUp, MessageSquareQuote, ChevronRight } from 'lucide-react';
+import { TrendingUp, MessageSquareQuote } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 /* ── Helper: category → CSS chip class ─────────────────────────────────────── */
@@ -145,16 +145,11 @@ function LatestNewsSection({ articles }: { articles: Article[] }) {
 
   return (
     <section className="mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-1 h-5 bg-primary rounded-full" />
-          <h2 className="text-lg font-black text-text-main tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-            Latest News
-          </h2>
-        </div>
-        <button className="flex items-center gap-1 text-xs font-bold text-primary hover:underline">
-          View All News <ChevronRight size={14} />
-        </button>
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-1 h-5 bg-primary rounded-full" />
+        <h2 className="text-lg font-black text-primary tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
+          Latest News
+        </h2>
       </div>
       <hr className="section-divider mb-4" />
 
@@ -248,16 +243,11 @@ function TrendingSection({ articles }: { articles: Article[] }) {
 
   return (
     <section className="mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <TrendingUp size={16} className="text-primary" />
-          <h2 className="text-lg font-black text-text-main tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
-            Trending Now
-          </h2>
-        </div>
-        <button className="flex items-center gap-1 text-xs font-bold text-primary hover:underline">
-          View All <ChevronRight size={14} />
-        </button>
+      <div className="flex items-center gap-2 mb-4">
+        <TrendingUp size={16} className="text-primary" />
+        <h2 className="text-lg font-black text-primary tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
+          Trending Now
+        </h2>
       </div>
       <hr className="section-divider mb-4" />
 
@@ -480,7 +470,7 @@ export const ArticleFeed = () => {
         <>
           <div className="flex items-center gap-3 mb-6 mt-2">
             <div className="w-1 h-5 bg-primary rounded-full" />
-            <h2 className="text-lg font-black text-text-main tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
+            <h2 className="text-lg font-black text-primary tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
               More Articles
             </h2>
           </div>

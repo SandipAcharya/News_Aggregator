@@ -91,7 +91,7 @@ export const Login = () => {
                             <div className="text-xl font-black text-white tracking-tight" style={{ fontFamily: 'var(--font-serif)' }}>
                                 BICHAR BIMARSH
                             </div>
-                            <div className="text-xs font-bold tracking-[0.3em] text-primary">MEDIA</div>
+                            <div className="text-xs font-bold tracking-[0.3em] text-white">MEDIA</div>
                         </div>
                     </div>
 
@@ -125,7 +125,7 @@ export const Login = () => {
                 {/* Back to home */}
                 <button
                     onClick={() => navigate('/')}
-                    className="absolute top-6 left-6 flex items-center gap-2 text-sm text-text-muted hover:text-text-main transition-colors font-medium"
+                    className="absolute top-6 left-6 flex items-center gap-2 text-sm text-white hover:text-text-main transition-colors font-medium"
                 >
                     <ArrowLeft size={15} /> Back to News
                 </button>
