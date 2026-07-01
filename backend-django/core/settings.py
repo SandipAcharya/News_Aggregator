@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import urllib.parse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,10 +83,18 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 import dj_database_url
 
+# Safely parse DATABASE_URL — URL-encodes the password to handle special
+# characters like @ and # that would otherwise break URL parsing.
+_raw_db_url = os.environ.get('DATABASE_URL', 'postgresql://news_user:news_password@localhost:5432/news_db')
+try:
+    _parsed = urllib.parse.urlparse(_raw_db_url)
+    _encoded_password = urllib.parse.quote(_parsed.password or '', safe='')
+    _safe_db_url = _raw_db_url.replace(f':{_parsed.password}@', f':{_encoded_password}@', 1)
+except Exception:
+    _safe_db_url = _raw_db_url
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgresql://news_user:news_password@localhost:5432/news_db')
-    )
+    'default': dj_database_url.config(default=_safe_db_url)
 }
 
 
@@ -129,19 +138,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Celery Configuration
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'amqp://guest:guest@localhost:5672//')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_BACKEND = 'rpc://'
-
-# Celery Beat — Periodic Task Schedule
-from celery.schedules import crontab
-
-CELERY_BEAT_SCHEDULE = {
-    'scrape-rss-feeds-every-30-minutes': {
-        'task': 'news.tasks.scrape_rss_feeds',
-        'schedule': crontab(minute='*/30'),  # Every 30 minutes
-    },
-}
+# Scraping is now handled by the lightweight scraper-cron service.
+# Celery and RabbitMQ have been removed.
 
