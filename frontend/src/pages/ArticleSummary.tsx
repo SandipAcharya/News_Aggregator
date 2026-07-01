@@ -11,7 +11,8 @@ export function ArticleSummary() {
   const { data: articleRes, isLoading: articleLoading } = useQuery({
     queryKey: ['article', id],
     queryFn: async () => {
-      const res = await fetch(`/api/articles/${id}`);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      const res = await fetch(`${baseUrl}/articles/${id}`);
       if (!res.ok) throw new Error('Failed to fetch article details');
       return res.json();
     },
@@ -20,7 +21,8 @@ export function ArticleSummary() {
   const { data: summaryRes, isLoading: summaryLoading } = useQuery({
     queryKey: ['article_summary', id],
     queryFn: async () => {
-      const res = await fetch(`/api/articles/${id}/summary`);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+      const res = await fetch(`${baseUrl}/articles/${id}/summary`);
       if (!res.ok) throw new Error('Failed to generate summary');
       return res.json();
     },
