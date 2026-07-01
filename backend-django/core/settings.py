@@ -133,6 +133,9 @@ STATIC_URL = 'static/'
 import os
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Use database-backed sessions so all machines share session state
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Scraping is now handled by the lightweight scraper-cron service.
