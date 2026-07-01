@@ -1,210 +1,340 @@
 [
-{
-  "model": "news.newssource",
-  "pk": "e441be6e-63f8-48df-b7f9-88f6bbd5aa76",
-  "fields": {
-    "name": "BBC News",
-    "url": "https://www.bbc.com",
-    "rss_feed_url": "http://feeds.bbci.co.uk/news/rss.xml",
-    "country": "GB",
-    "source_type": "broadcast",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.968Z"
+  {
+    "model": "news.newssource",
+    "pk": "e441be6e-63f8-48df-b7f9-88f6bbd5aa76",
+    "fields": {
+      "name": "BBC News",
+      "url": "https://www.bbc.com",
+      "rss_feed_url": "http://feeds.bbci.co.uk/news/rss.xml",
+      "country": "GB",
+      "source_type": "broadcast",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.968Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "a0fc74ac-af6a-420e-b779-b3e88d641477",
+    "fields": {
+      "name": "The Guardian",
+      "url": "https://www.theguardian.com",
+      "rss_feed_url": "https://www.theguardian.com/world/rss",
+      "country": "GB",
+      "source_type": "newspaper",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.972Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "d6ad4b7f-e4ca-4273-aa57-2fdc90a0fffd",
+    "fields": {
+      "name": "Al Jazeera English",
+      "url": "https://www.aljazeera.com",
+      "rss_feed_url": "https://www.aljazeera.com/xml/rss/all.xml",
+      "country": "QA",
+      "source_type": "broadcast",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.975Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "ea310cb0-5108-48c2-a47e-e074ef29616d",
+    "fields": {
+      "name": "The New York Times",
+      "url": "https://www.nytimes.com",
+      "rss_feed_url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+      "country": "US",
+      "source_type": "newspaper",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.981Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "5cbf9dc5-7629-496d-9e38-e33d22fb3320",
+    "fields": {
+      "name": "The Washington Post",
+      "url": "https://www.washingtonpost.com",
+      "rss_feed_url": "https://feeds.washingtonpost.com/rss/world",
+      "country": "US",
+      "source_type": "newspaper",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.983Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "b92cc149-acfe-4420-b703-d8fde146f26d",
+    "fields": {
+      "name": "TechCrunch",
+      "url": "https://techcrunch.com",
+      "rss_feed_url": "https://techcrunch.com/feed/",
+      "country": "US",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.986Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "8232c70f-0eae-4174-8f40-c8cc38bdc937",
+    "fields": {
+      "name": "The Verge",
+      "url": "https://www.theverge.com",
+      "rss_feed_url": "https://www.theverge.com/rss/index.xml",
+      "country": "US",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.989Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "f8639a15-a657-45c2-b213-df1c71d46af0",
+    "fields": {
+      "name": "Wired",
+      "url": "https://www.wired.com",
+      "rss_feed_url": "https://www.wired.com/feed/rss",
+      "country": "US",
+      "source_type": "magazine",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.991Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "70dcb4db-7688-40a7-bca4-00aa5a61bb41",
+    "fields": {
+      "name": "Bloomberg",
+      "url": "https://www.bloomberg.com",
+      "rss_feed_url": "https://feeds.bloomberg.com/markets/news.rss",
+      "country": "US",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.994Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "cadb680a-c592-4a46-93b6-5b4e5a4011a5",
+    "fields": {
+      "name": "Financial Times",
+      "url": "https://www.ft.com",
+      "rss_feed_url": "https://www.ft.com/rss/home/uk",
+      "country": "GB",
+      "source_type": "newspaper",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.997Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "57486984-caf9-4a38-bf15-e0b3de03f028",
+    "fields": {
+      "name": "CNN",
+      "url": "https://www.cnn.com",
+      "rss_feed_url": "http://rss.cnn.com/rss/edition.rss",
+      "country": "US",
+      "source_type": "broadcast",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.978Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "5798309f-592c-4623-a275-732934664f07",
+    "fields": {
+      "name": "The Kathmandu Post",
+      "url": "https://kathmandupost.com",
+      "rss_feed_url": "https://kathmandupost.com/rss",
+      "country": "NP",
+      "source_type": "newspaper",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:11.999Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "def3c270-de44-4613-bef9-56cd40e6d39b",
+    "fields": {
+      "name": "The Hindu",
+      "url": "https://www.thehindu.com",
+      "rss_feed_url": "https://www.thehindu.com/news/national/feeder/default.rss",
+      "country": "IN",
+      "source_type": "newspaper",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:12.002Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "39478293-eec7-47e9-b3d1-be6caa7f58b8",
+    "fields": {
+      "name": "NDTV",
+      "url": "https://www.ndtv.com",
+      "rss_feed_url": "https://feeds.feedburner.com/ndtvnews-top-stories",
+      "country": "IN",
+      "source_type": "broadcast",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:12.004Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "e232e683-2325-4b41-aec9-928f9feab415",
+    "fields": {
+      "name": "Science Daily",
+      "url": "https://www.sciencedaily.com",
+      "rss_feed_url": "https://www.sciencedaily.com/rss/all.xml",
+      "country": "US",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:12.007Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "b1f8969b-e9f3-4e90-aab0-b106ab97ac7c",
+    "fields": {
+      "name": "NASA Breaking News",
+      "url": "https://www.nasa.gov",
+      "rss_feed_url": "https://www.nasa.gov/rss/dyn/breaking_news.rss",
+      "country": "US",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-06-26T09:43:12.010Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "61289303-290f-45c0-815b-6158eb4dae21",
+    "fields": {
+      "name": "OnlineKhabar (English)",
+      "url": "https://english.onlinekhabar.com",
+      "rss_feed_url": "https://english.onlinekhabar.com/feed",
+      "country": "NP",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "73f3345f-2f0f-4b52-8243-bd82cf923866",
+    "fields": {
+      "name": "Nepali Times",
+      "url": "https://www.nepalitimes.com",
+      "rss_feed_url": "https://www.nepalitimes.com/feed",
+      "country": "NP",
+      "source_type": "newspaper",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "d7c2fdac-1cc2-42eb-8244-052e74e57e59",
+    "fields": {
+      "name": "The Himalayan Times",
+      "url": "https://thehimalayantimes.com",
+      "rss_feed_url": "https://thehimalayantimes.com/feed/",
+      "country": "NP",
+      "source_type": "newspaper",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "970e13a4-b0d9-4686-b968-ff12634528e6",
+    "fields": {
+      "name": "Setopati (English)",
+      "url": "https://en.setopati.com",
+      "rss_feed_url": "https://en.setopati.com/feed",
+      "country": "NP",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "970a597e-1732-42a3-9763-ba41c8fb4c8b",
+    "fields": {
+      "name": "NPR News",
+      "url": "https://www.npr.org",
+      "rss_feed_url": "https://feeds.npr.org/1001/rss.xml",
+      "country": "US",
+      "source_type": "broadcast",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "77889335-324a-446c-898b-193ef9f15ce3",
+    "fields": {
+      "name": "Fox News",
+      "url": "https://www.foxnews.com",
+      "rss_feed_url": "http://feeds.foxnews.com/foxnews/latest",
+      "country": "US",
+      "source_type": "broadcast",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "be30e9b6-6947-4366-8150-0a8178c6a592",
+    "fields": {
+      "name": "Wall Street Journal",
+      "url": "https://www.wsj.com",
+      "rss_feed_url": "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+      "country": "US",
+      "source_type": "newspaper",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "09a9bfa0-b0c4-4231-8fd5-c630402bc5e9",
+    "fields": {
+      "name": "TechRadar",
+      "url": "https://www.techradar.com",
+      "rss_feed_url": "https://www.techradar.com/rss",
+      "country": "US",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "c7f25048-b4fa-41ff-8286-e6122ebca9ac",
+    "fields": {
+      "name": "Engadget",
+      "url": "https://www.engadget.com",
+      "rss_feed_url": "https://www.engadget.com/rss.xml",
+      "country": "US",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
+  },
+  {
+    "model": "news.newssource",
+    "pk": "855f6b22-54fb-4068-b7c2-6fb88649e9fd",
+    "fields": {
+      "name": "Gizmodo",
+      "url": "https://gizmodo.com",
+      "rss_feed_url": "https://gizmodo.com/rss",
+      "country": "US",
+      "source_type": "digital",
+      "is_active": true,
+      "created_at": "2026-07-01T16:01:09.875800Z"
+    }
   }
-},
-{
-  "model": "news.newssource",
-  "pk": "a0fc74ac-af6a-420e-b779-b3e88d641477",
-  "fields": {
-    "name": "The Guardian",
-    "url": "https://www.theguardian.com",
-    "rss_feed_url": "https://www.theguardian.com/world/rss",
-    "country": "GB",
-    "source_type": "newspaper",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.972Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "d6ad4b7f-e4ca-4273-aa57-2fdc90a0fffd",
-  "fields": {
-    "name": "Al Jazeera English",
-    "url": "https://www.aljazeera.com",
-    "rss_feed_url": "https://www.aljazeera.com/xml/rss/all.xml",
-    "country": "QA",
-    "source_type": "broadcast",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.975Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "ea310cb0-5108-48c2-a47e-e074ef29616d",
-  "fields": {
-    "name": "The New York Times",
-    "url": "https://www.nytimes.com",
-    "rss_feed_url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
-    "country": "US",
-    "source_type": "newspaper",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.981Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "5cbf9dc5-7629-496d-9e38-e33d22fb3320",
-  "fields": {
-    "name": "The Washington Post",
-    "url": "https://www.washingtonpost.com",
-    "rss_feed_url": "https://feeds.washingtonpost.com/rss/world",
-    "country": "US",
-    "source_type": "newspaper",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.983Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "b92cc149-acfe-4420-b703-d8fde146f26d",
-  "fields": {
-    "name": "TechCrunch",
-    "url": "https://techcrunch.com",
-    "rss_feed_url": "https://techcrunch.com/feed/",
-    "country": "US",
-    "source_type": "digital",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.986Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "8232c70f-0eae-4174-8f40-c8cc38bdc937",
-  "fields": {
-    "name": "The Verge",
-    "url": "https://www.theverge.com",
-    "rss_feed_url": "https://www.theverge.com/rss/index.xml",
-    "country": "US",
-    "source_type": "digital",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.989Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "f8639a15-a657-45c2-b213-df1c71d46af0",
-  "fields": {
-    "name": "Wired",
-    "url": "https://www.wired.com",
-    "rss_feed_url": "https://www.wired.com/feed/rss",
-    "country": "US",
-    "source_type": "magazine",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.991Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "70dcb4db-7688-40a7-bca4-00aa5a61bb41",
-  "fields": {
-    "name": "Bloomberg",
-    "url": "https://www.bloomberg.com",
-    "rss_feed_url": "https://feeds.bloomberg.com/markets/news.rss",
-    "country": "US",
-    "source_type": "digital",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.994Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "cadb680a-c592-4a46-93b6-5b4e5a4011a5",
-  "fields": {
-    "name": "Financial Times",
-    "url": "https://www.ft.com",
-    "rss_feed_url": "https://www.ft.com/rss/home/uk",
-    "country": "GB",
-    "source_type": "newspaper",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.997Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "57486984-caf9-4a38-bf15-e0b3de03f028",
-  "fields": {
-    "name": "CNN",
-    "url": "https://www.cnn.com",
-    "rss_feed_url": "http://rss.cnn.com/rss/edition.rss",
-    "country": "US",
-    "source_type": "broadcast",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.978Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "5798309f-592c-4623-a275-732934664f07",
-  "fields": {
-    "name": "The Kathmandu Post",
-    "url": "https://kathmandupost.com",
-    "rss_feed_url": "https://kathmandupost.com/rss",
-    "country": "NP",
-    "source_type": "newspaper",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:11.999Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "def3c270-de44-4613-bef9-56cd40e6d39b",
-  "fields": {
-    "name": "The Hindu",
-    "url": "https://www.thehindu.com",
-    "rss_feed_url": "https://www.thehindu.com/news/national/feeder/default.rss",
-    "country": "IN",
-    "source_type": "newspaper",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:12.002Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "39478293-eec7-47e9-b3d1-be6caa7f58b8",
-  "fields": {
-    "name": "NDTV",
-    "url": "https://www.ndtv.com",
-    "rss_feed_url": "https://feeds.feedburner.com/ndtvnews-top-stories",
-    "country": "IN",
-    "source_type": "broadcast",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:12.004Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "e232e683-2325-4b41-aec9-928f9feab415",
-  "fields": {
-    "name": "Science Daily",
-    "url": "https://www.sciencedaily.com",
-    "rss_feed_url": "https://www.sciencedaily.com/rss/all.xml",
-    "country": "US",
-    "source_type": "digital",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:12.007Z"
-  }
-},
-{
-  "model": "news.newssource",
-  "pk": "b1f8969b-e9f3-4e90-aab0-b106ab97ac7c",
-  "fields": {
-    "name": "NASA Breaking News",
-    "url": "https://www.nasa.gov",
-    "rss_feed_url": "https://www.nasa.gov/rss/dyn/breaking_news.rss",
-    "country": "US",
-    "source_type": "digital",
-    "is_active": true,
-    "created_at": "2026-06-26T09:43:12.010Z"
-  }
-}
 ]
