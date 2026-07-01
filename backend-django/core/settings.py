@@ -29,7 +29,13 @@ SECRET_KEY = os.environ.get(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*'] # In strict production, replace with actual domain
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://backend-django.fly.dev',
+    'http://localhost',
+    'http://localhost:8000',
+]
 
 
 # Application definition
