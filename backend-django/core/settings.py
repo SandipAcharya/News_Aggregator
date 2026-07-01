@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-import urllib.parse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -80,21 +79,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 import dj_database_url
 
-# Safely parse DATABASE_URL — URL-encodes the password to handle special
-# characters like @ and # that would otherwise break URL parsing.
-_raw_db_url = os.environ.get('DATABASE_URL', 'postgresql://news_user:news_password@localhost:5432/news_db')
-try:
-    _parsed = urllib.parse.urlparse(_raw_db_url)
-    _encoded_password = urllib.parse.quote(_parsed.password or '', safe='')
-    _safe_db_url = _raw_db_url.replace(f':{_parsed.password}@', f':{_encoded_password}@', 1)
-except Exception:
-    _safe_db_url = _raw_db_url
-
 DATABASES = {
-    'default': dj_database_url.parse(_safe_db_url)
+    'default': dj_database_url.config(
+        default='postgresql://news_user:news_password@localhost:5432/news_db'
+    )
 }
 
 
