@@ -1,4 +1,4 @@
-from celery import shared_task
+# Celery removed — scrape_rss_feeds is now called directly by the scraper-cron service
 import json
 import os
 import trafilatura
@@ -73,7 +73,6 @@ def extract_image(entry) -> str:
     return ''
 
 
-@shared_task
 def scrape_rss_feeds():
     """
     Periodic task to scrape all active NewsSource RSS feeds.
@@ -176,7 +175,6 @@ Respond EXACTLY with this JSON structure:
 
     return f"Scraped {new_articles_count} new articles."
 
-@shared_task
 def generate_article_summary(article_id):
     """
     Fetch full article text using trafilatura and generate a JSON summary using Groq Llama 3.3.

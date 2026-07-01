@@ -1,3 +1,1 @@
-from .celery import app as celery_app
-
-__all__ = ('celery_app',)
+# Celery has been removed. Scraping is handled by the scraper-cron service.
