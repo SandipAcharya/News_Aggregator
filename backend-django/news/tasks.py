@@ -117,9 +117,11 @@ def scrape_rss_feeds():
             # Request enrichment from Groq API directly (Replaces ml-fastapi)
             groq_api_key = os.environ.get("GROQ_API_KEY")
             if groq_api_key:
-                try:
-                    client = Groq(api_key=groq_api_key)
-                    prompt = f"""
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        client = Groq(api_key=groq_api_key)
+                        prompt = f"""
 You are a news classifier. Analyze this article and return ONLY valid JSON.
 Source: {source.name}
 Title: {entry.title}
@@ -133,15 +135,27 @@ Respond EXACTLY with this JSON structure:
   "summary": ["A short 1-2 sentence summary of the article."]
 }}
 """
-                    response = client.chat.completions.create(
-                        messages=[{"role": "user", "content": prompt}],
-                        model="llama-3.1-8b-instant",
-                        temperature=0.1,
-                        response_format={"type": "json_object"}
-                    )
-                    ml_data = json.loads(response.choices[0].message.content)
-                except Exception as e:
-                    print(f"Groq API Error for {entry.link}: {e}")
+                        response = client.chat.completions.create(
+                            messages=[{"role": "user", "content": prompt}],
+                            model="llama-3.1-8b-instant",
+                            temperature=0.1,
+                            response_format={"type": "json_object"}
+                        )
+                        ml_data = json.loads(response.choices[0].message.content)
+                        time.sleep(2) # Small pause to help prevent hitting the rate limit
+                        break # Success, break out of retry loop
+                    except Exception as e:
+                        error_str = str(e)
+                        if "429" in error_str or "rate_limit" in error_str.lower():
+                            if attempt < max_retries - 1:
+                                wait_time = 3 ** (attempt + 1)
+                                print(f"Rate limit hit. Waiting {wait_time}s before retry... (Attempt {attempt + 1}/{max_retries})")
+                                time.sleep(wait_time)
+                            else:
+                                print(f"Groq API Rate Limit failed after {max_retries} attempts for {entry.link}: {e}")
+                        else:
+                            print(f"Groq API Error for {entry.link}: {e}")
+                            break # Break on non-429 errors
             else:
                 print("GROQ_API_KEY not found in environment, skipping enrichment.")
 
