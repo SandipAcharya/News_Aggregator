@@ -17,7 +17,7 @@ console_command = '/code/manage.py shell'
 
 [processes]
   app = 'python manage.py runserver 0.0.0.0:8000'
-  celery = 'celery -A core/settings.py worker --loglevel=INFO'
+  scraper = '/bin/sh -c "while true; do python manage.py scrape_now; sleep 900; done"'
 
 [http_service]
   internal_port = 8000
