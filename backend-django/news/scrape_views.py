@@ -1,4 +1,5 @@
 import os
+import threading
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -17,7 +18,9 @@ def trigger_scrape(request):
 
     try:
         from news.tasks import scrape_rss_feeds
-        result = scrape_rss_feeds()
-        return JsonResponse({'status': 'ok', 'result': result})
+        # Run in a background thread so we don't timeout the HTTP request
+        thread = threading.Thread(target=scrape_rss_feeds)
+        thread.start()
+        return JsonResponse({'status': 'ok', 'message': 'Scraping started in background'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'detail': str(e)}, status=500)
