@@ -94,7 +94,7 @@ except Exception:
     _safe_db_url = _raw_db_url
 
 DATABASES = {
-    'default': dj_database_url.config(default=_safe_db_url)
+    'default': dj_database_url.parse(_safe_db_url)
 }
 
 
