@@ -10,7 +10,7 @@ console_command = '/code/manage.py shell'
 [build]
 
 [deploy]
-  release_command = '/bin/sh -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput"'
+  release_command = '/bin/sh -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput && python -c \"import django; django.setup(); from django.contrib.auth import get_user_model; U=get_user_model(); U.objects.filter(username=\\\"admin\\\").exists() or U.objects.create_superuser(\\\"admin\\\",\\\"admin@inpanda.com\\\",\\\"Admin@1234\\\")\""'
 
 [env]
   PORT = '8000'
