@@ -149,8 +149,9 @@ export const triggerArticleSummary = async (id: string) => {
     // 2. If not, trigger Django synchronously
     try {
         console.log(`[Node] Triggering Django summary generation for ${id}`);
-        // Communicate with internal django-admin container over Docker network
-        const djangoUrl = `http://django-admin:8000/internal/api/articles/${id}/summary`;
+        // Communicate with internal django-admin container (or Fly.io production URL)
+        const baseUrl = process.env.DJANGO_API_URL || 'http://django-admin:8000';
+        const djangoUrl = `${baseUrl}/internal/api/articles/${id}/summary`;
         const response = await axios.post(djangoUrl);
         return response.data;
     } catch (err: any) {
